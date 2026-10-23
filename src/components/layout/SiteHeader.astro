@@ -1,0 +1,198 @@
+---
+import { Image } from 'astro:assets';
+import LanguageSwitcher from '../navigation/LanguageSwitcher.astro';
+import { useTranslations } from '../../i18n/utils';
+import type { SupportedLanguage } from '../../i18n/ui';
+import logoImg from '../../assets/logo.png';
+
+interface Props {
+  lang: SupportedLanguage;
+  counterpartUrl?: string;
+}
+
+const { lang, counterpartUrl } = Astro.props;
+const t = useTranslations(lang);
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { href: `/${lang}/`, label: t('nav.home') },
+  { href: `/${lang}/explore/`, label: t('nav.explore') },
+];
+
+function isActive(href: string) {
+  if (href === `/${lang}/`) {
+    return currentPath === `/${lang}/` || currentPath === `/${lang}`;
+  }
+  return currentPath.startsWith(href);
+}
+---
+
+<header class="site-header">
+  <div class="container site-header__inner">
+    <a href={`/${lang}/`} class="site-header__brand" aria-label="aftertone - Home">
+      <Image
+        src={logoImg}
+        alt="aftertone logo"
+        class="brand-logo"
+        width={36}
+        height={36}
+        loading="eager"
+      />
+      <div class="brand-text">
+        <span class="brand-title">aftertone</span>
+        <span class="brand-subtitle">{t('brand.tagline')}</span>
+      </div>
+    </a>
+
+    <nav class="site-header__nav" aria-label="Main Navigation">
+      <ul class="nav-list">
+        {
+          navItems.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <li class="nav-item">
+                <a
+                  href={item.href}
+                  class:list={['nav-link', { 'nav-link--active': active }]}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {item.label}
+                  {active && <span class="active-dot" aria-hidden="true"></span>}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <LanguageSwitcher currentLang={lang} counterpartUrl={counterpartUrl} currentPath={currentPath} />
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgb(247 250 248 / 88%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgb(214 227 229 / 60%);
+    box-shadow: 0 4px 16px rgb(16 55 71 / 4%);
+    padding-block: var(--space-3);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .site-header__brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+
+  .brand-logo {
+    width: 2.25rem;
+    height: 2.25rem;
+    object-fit: contain;
+    flex-shrink: 0;
+    border-radius: var(--radius-xs);
+    box-shadow: 0 2px 6px rgb(16 55 71 / 8%);
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-title {
+    font-size: var(--text-lg);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--color-blue-900);
+  }
+
+  .brand-subtitle {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .site-header__nav {
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-list {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: var(--space-2);
+  }
+
+  .nav-link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition:
+      color var(--motion-fast) var(--ease-standard),
+      background var(--motion-fast) var(--ease-standard);
+  }
+
+  .nav-link:hover {
+    color: var(--color-blue-900);
+    background: var(--color-aqua-100);
+  }
+
+  .nav-link--active {
+    color: var(--color-blue-900);
+    background: rgb(221 248 250 / 60%);
+  }
+
+  .active-dot {
+    width: 5px;
+    height: 5px;
+    background: var(--color-orange-500);
+    border-radius: 1px;
+    box-shadow: 0 0 4px rgb(255 120 62 / 60%);
+  }
+
+  .site-header__actions {
+    display: flex;
+    align-items: center;
+  }
+
+  @media (max-width: 640px) {
+    .brand-subtitle {
+      display: none;
+    }
+
+    .nav-list {
+      gap: 0;
+    }
+
+    .nav-link {
+      padding: var(--space-1) var(--space-2);
+      font-size: var(--text-xs);
+    }
+  }
+</style>

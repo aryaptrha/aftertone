@@ -1,0 +1,15 @@
+artist: "JKT48"
+genre: idol-pop
+themes:
+  - probability
+  - cosmic-love
+  - first-sight
+  - unexpected-encounter
+  - emotional-awakening
+# Set to "published" and add publishedAt (YYYY-MM-DD) when both articles are written.
+status: draft
+featured: false
+relatedSongs: []
+# listenLinks:
+#   spotify: "https://open.spotify.com/track/..."
+#   youtube: "https://www.youtube.com/watch?v=..."

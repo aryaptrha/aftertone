@@ -1,0 +1,118 @@
+---
+import '../styles/global.css';
+import ObiDock from '../components/layout/ObiDock.astro';
+import DecorativeOrb from '../components/ui/DecorativeOrb.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+import type { SupportedLanguage } from '../i18n/ui';
+
+interface Props {
+  title: string;
+  description?: string;
+  lang?: SupportedLanguage;
+  counterpartUrl?: string;
+  image?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title,
+  description = 'aftertone is a cyber-physical music interpretation archive exploring the narratives, emotions, and symbolism behind songs.',
+  lang = getLangFromUrl(Astro.url),
+  counterpartUrl,
+  image = '/images/og-default.png',
+  type = 'website',
+} = Astro.props;
+
+const t = useTranslations(lang);
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site || 'https://aftertone.pages.dev');
+const pageTitle = title.includes('aftertone') ? title : `${title} — aftertone`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    {/* Symmetrical hreflang */}
+    {counterpartUrl && (
+      <link
+        rel="alternate"
+        hreflang={lang === 'id' ? 'en' : 'id'}
+        href={new URL(counterpartUrl, Astro.site || 'https://aftertone.pages.dev')}
+      />
+    )}
+    <link
+      rel="alternate"
+      hreflang={lang}
+      href={canonicalUrl}
+    />
+
+    {/* Open Graph */}
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:site_name" content="aftertone" />
+    <meta property="og:locale" content={lang === 'id' ? 'id_ID' : 'en_US'} />
+
+    {/* Twitter */}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    {/* Typography Preconnect */}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,600;0,700;0,800;1,600&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="page-shell">
+      <a href="#main-content" class="skip-link">
+        {t('a11y.skipToContent')}
+      </a>
+
+      {/* Atmospheric liquid light background auras */}
+      <DecorativeOrb position="top-left" size="lg" color="aqua" />
+      <DecorativeOrb position="top-right" size="md" color="orange" />
+
+      <!-- Architectural Obi-Spine + Main Stage -->
+      <div class="app-layout">
+        <ObiDock lang={lang} counterpartUrl={counterpartUrl} />
+
+        <div class="main-stage">
+          <main id="main-content" class="site-main">
+            <slot />
+          </main>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<style>
+  .site-main {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: var(--space-20);
+  }
+
+  @media (max-width: 860px) {
+    .site-main {
+      padding-bottom: calc(var(--space-20) + 4rem);
+    }
+  }
+</style>

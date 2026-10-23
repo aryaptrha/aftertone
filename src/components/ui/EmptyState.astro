@@ -1,0 +1,94 @@
+---
+import GlossButton from './GlossButton.astro';
+
+interface Props {
+  title: string;
+  text: string;
+  actionText?: string;
+  actionHref?: string;
+  actionId?: string;
+  class?: string;
+}
+
+const {
+  title,
+  text,
+  actionText,
+  actionHref,
+  actionId,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['empty-state', className]} role="status">
+  <div class="empty-state__icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M8 12h8"></path>
+      <circle cx="9" cy="9" r="1" fill="currentColor"></circle>
+      <circle cx="15" cy="9" r="1" fill="currentColor"></circle>
+    </svg>
+  </div>
+  <h3 class="empty-state__title">{title}</h3>
+  <p class="empty-state__text">{text}</p>
+  {actionText && (
+    <div class="empty-state__action">
+      <GlossButton
+        href={actionHref}
+        id={actionId}
+        variant="secondary"
+      >
+        {actionText}
+      </GlossButton>
+    </div>
+  )}
+</div>
+
+<style>
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-12) var(--space-6);
+    background: var(--color-white);
+    border: 1px dashed var(--color-line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+
+  .empty-state__icon {
+    width: 3.5rem;
+    height: 3.5rem;
+    color: var(--color-aqua-500);
+    margin-bottom: var(--space-4);
+    opacity: 0.85;
+  }
+
+  .empty-state__icon svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  .empty-state__title {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-bottom: var(--space-2);
+  }
+
+  .empty-state__text {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    max-width: 38ch;
+    margin-bottom: var(--space-6);
+    line-height: 1.5;
+  }
+
+  .empty-state__action {
+    display: flex;
+    justify-content: center;
+  }
+</style>

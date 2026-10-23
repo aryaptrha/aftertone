@@ -1,0 +1,450 @@
+---
+import FrequencyTuner from '../ui/FrequencyTuner.astro';
+import ArchivalStamp from '../ui/ArchivalStamp.astro';
+import Soundplate from './Soundplate.astro';
+import { useTranslations } from '../../i18n/utils';
+import type { SupportedLanguage } from '../../i18n/ui';
+import { getGenreLabel } from '../../data/genres';
+import { getThemeLabel } from '../../data/themes';
+import type { Article } from '../../data/articles';
+
+interface Props {
+  song: Article;
+  lang: SupportedLanguage;
+  class?: string;
+}
+
+const { song, lang, class: className = '' } = Astro.props;
+const t = useTranslations(lang);
+const songHref = `/${lang}/songs/${song.data.slug}/`;
+const catCode = song.data.catalogCode;
+const displayTitle = song.data.songTitle || song.data.title;
+const genreLabel = getGenreLabel(song.data.genre, lang);
+const readTime = song.data.readTimeMinutes;
+---
+
+<article
+  class:list={['sleeve-card', className]}
+  data-sleeve-card
+  data-title={song.data.title.toLowerCase()}
+  data-song-title={displayTitle.toLowerCase()}
+  data-artist={song.data.artist.toLowerCase()}
+  data-themes={song.data.themes.join(',').toLowerCase()}
+>
+  <div class="sleeve-card__chassis" data-sleeve-chassis>
+    <!-- Specular Holographic Glare Overlay -->
+    <div class="sleeve-glare" data-sleeve-glare aria-hidden="true"></div>
+
+    <!-- Slide-Out Vinyl Disc (Emerges from right spine on hover) -->
+    <div class="sleeve-disc-envelope" aria-hidden="true" data-sleeve-disc>
+      <Soundplate
+        title={displayTitle}
+        artist={song.data.artist}
+        catalogCode={catCode}
+        size="sm"
+        interactive={false}
+      />
+    </div>
+
+    <!-- Main Outer Jacket Surface -->
+    <div class="sleeve-jacket">
+      <!-- Jacket Header: Catalog Code & Language Badge -->
+      <div class="jacket-header">
+        <ArchivalStamp code={catCode} label={genreLabel} color="aqua" />
+        <span class="jacket-spine-tag">STEREO LP</span>
+      </div>
+
+      <!-- Artwork & Mood Chamber -->
+      <div class="jacket-preview">
+        <div class="preview-backdrop">
+          <div class="preview-lathe-rings"></div>
+          <div class="preview-light-bloom"></div>
+        </div>
+
+        <div class="jacket-titles">
+          <h3 class="jacket-title">
+            <a href={songHref} class="title-link">{song.data.title}</a>
+          </h3>
+          <p class="jacket-artist">
+            <span class="artist-by">{t('song.by')}</span>
+            <span class="artist-name">{song.data.artist}</span>
+          </p>
+        </div>
+      </div>
+
+      <!-- Lyrical / Hermeneutic Thesis Summary -->
+      <p class="jacket-summary">{song.data.summary}</p>
+
+      <!-- Frequency Tuner Tags -->
+      <div class="jacket-frequencies">
+        {song.data.themes.slice(0, 2).map((theme) => (
+          <FrequencyTuner
+            label={getThemeLabel(theme, lang)}
+            href={`/${lang}/explore/?theme=${encodeURIComponent(theme)}`}
+          />
+        ))}
+      </div>
+
+      <!-- Jacket Footer: Pull-Out Action & Read Time Telemetry -->
+      <div class="jacket-footer">
+        <a href={songHref} class="sleeve-pull-btn">
+          <span class="pull-dot" aria-hidden="true"></span>
+          <span>{lang === 'id' ? 'Baca Liner Notes' : 'Open Liner Notes'}</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+
+        {readTime && (
+          <span class="telemetry-read-time">
+            <span class="clock-icon" aria-hidden="true">⏱</span>
+            {readTime} {t('song.readTime')}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+  import gsap from 'gsap';
+
+  function initSleeveCards() {
+    const cards = document.querySelectorAll<HTMLElement>('[data-sleeve-card]');
+
+    cards.forEach((card) => {
+      const chassis = card.querySelector<HTMLElement>('[data-sleeve-chassis]');
+      const glare = card.querySelector<HTMLElement>('[data-sleeve-glare]');
+      const disc = card.querySelector<HTMLElement>('[data-sleeve-disc]');
+
+      if (!chassis) return;
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // GSAP QuickTo for 3D Magnetic Perspective Tilt
+      let quickX: any, quickY: any;
+      if (!prefersReduced) {
+        quickX = gsap.quickTo(chassis, 'rotateY', { duration: 0.4, ease: 'power2.out' });
+        quickY = gsap.quickTo(chassis, 'rotateX', { duration: 0.4, ease: 'power2.out' });
+      }
+
+      card.addEventListener('mousemove', (e) => {
+        if (prefersReduced || !quickX || !quickY) return;
+
+        const rect = card.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const xNorm = (mouseX / rect.width) * 2 - 1; // -1 to 1
+        const yNorm = (mouseY / rect.height) * 2 - 1; // -1 to 1
+
+        quickX(xNorm * 7);  // Tilt Y ±7 deg
+        quickY(-yNorm * 7); // Tilt X ±7 deg
+
+        // Glare gradient tracking cursor
+        if (glare) {
+          glare.style.background = `radial-gradient(circle at ${mouseX}px ${mouseY}px, rgb(255 255 255 / 35%) 0%, transparent 65%)`;
+        }
+      });
+
+      card.addEventListener('mouseenter', () => {
+        if (disc && !prefersReduced) {
+          gsap.to(disc, {
+            x: '45%',
+            rotation: 45,
+            duration: 0.5,
+            ease: 'back.out(1.4)',
+          });
+        }
+      });
+
+      card.addEventListener('mouseleave', () => {
+        if (prefersReduced) return;
+
+        if (quickX && quickY) {
+          quickX(0);
+          quickY(0);
+        }
+
+        if (disc) {
+          gsap.to(disc, {
+            x: '0%',
+            rotation: 0,
+            duration: 0.4,
+            ease: 'power2.out',
+          });
+        }
+
+        if (glare) {
+          glare.style.background = 'transparent';
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSleeveCards);
+  } else {
+    initSleeveCards();
+  }
+  document.addEventListener('astro:page-load', initSleeveCards);
+</script>
+
+<style>
+  .sleeve-card {
+    position: relative;
+    perspective: 1200px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sleeve-card__chassis {
+    position: relative;
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sleeve);
+    transition:
+      border-color var(--motion-fast) var(--ease-tactile),
+      box-shadow var(--motion-fast) var(--ease-tactile);
+    transform-style: preserve-3d;
+    overflow: visible;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sleeve-card:hover .sleeve-card__chassis {
+    border-color: var(--color-aqua-500);
+    box-shadow: var(--shadow-gatefold-hover);
+  }
+
+  /* Specular Glare Layer */
+  .sleeve-glare {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-md);
+    pointer-events: none;
+    z-index: 10;
+    transition: opacity 0.2s ease;
+  }
+
+  /* Slide-Out Vinyl Disc Assembly */
+  .sleeve-disc-envelope {
+    position: absolute;
+    top: 15%;
+    right: 5%;
+    width: 6.5rem;
+    height: 6.5rem;
+    pointer-events: none;
+    z-index: 1;
+    transform: translateZ(-10px);
+    will-change: transform;
+    opacity: 0.95;
+  }
+
+  /* Main Jacket Surface */
+  .sleeve-jacket {
+    position: relative;
+    z-index: 2;
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 98%) 0%,
+        rgb(244 248 247 / 94%) 100%
+      );
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: var(--space-4);
+  }
+
+  /* Header */
+  .jacket-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .jacket-spine-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--color-amber-700);
+    background: rgb(255 240 230 / 80%);
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    border: 1px solid rgb(255 123 57 / 35%);
+  }
+
+  /* Preview Header & Title */
+  .jacket-preview {
+    position: relative;
+    border-radius: var(--radius-sm);
+    padding: var(--space-4) var(--space-4);
+    background:
+      linear-gradient(135deg,
+        rgb(221 248 250 / 65%) 0%,
+        rgb(244 248 247 / 40%) 60%,
+        rgb(255 240 230 / 45%) 100%
+      );
+    border: 1px solid rgb(208 226 229 / 80%);
+    overflow: hidden;
+  }
+
+  .preview-backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .preview-lathe-rings {
+    position: absolute;
+    right: -20%;
+    top: -30%;
+    width: 12rem;
+    height: 12rem;
+    border-radius: 50%;
+    border: 1px dashed rgb(56 200 217 / 30%);
+    box-shadow: 0 0 0 10px rgb(56 200 217 / 5%);
+  }
+
+  .preview-light-bloom {
+    position: absolute;
+    left: 10%;
+    bottom: -20%;
+    width: 8rem;
+    height: 8rem;
+    background: var(--color-aqua-200);
+    filter: blur(20px);
+    opacity: 0.5;
+  }
+
+  .jacket-titles {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .jacket-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 800;
+    line-height: var(--leading-heading);
+    letter-spacing: -0.015em;
+  }
+
+  .title-link {
+    color: var(--color-blue-900);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-tactile);
+  }
+
+  .title-link:hover {
+    color: var(--color-blue-700);
+  }
+
+  .jacket-artist {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .artist-by {
+    font-size: var(--text-xs);
+    opacity: 0.75;
+  }
+
+  .artist-name {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  /* Summary */
+  .jacket-summary {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    line-height: 1.62;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  /* Frequencies */
+  .jacket-frequencies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  /* Footer */
+  .jacket-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    margin-top: auto;
+  }
+
+  .sleeve-pull-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-blue-900);
+    text-decoration: none;
+    background: rgb(221 248 250 / 80%);
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--color-aqua-500);
+    box-shadow: 0 1px 2px rgb(16 59 82 / 8%);
+    transition:
+      transform var(--motion-fast) var(--ease-tactile),
+      background var(--motion-fast) var(--ease-tactile),
+      color var(--motion-fast) var(--ease-tactile);
+  }
+
+  .sleeve-pull-btn:hover {
+    background: var(--color-blue-900);
+    border-color: var(--color-blue-900);
+    color: var(--color-sleeve);
+    transform: translateX(2px);
+  }
+
+  .pull-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--color-amber-500);
+  }
+
+  .telemetry-read-time {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    color: var(--color-ink-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .clock-icon {
+    font-size: 0.65rem;
+  }
+</style>

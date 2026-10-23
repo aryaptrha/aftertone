@@ -1,0 +1,414 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TactileButton from '../../components/ui/TactileButton.astro';
+import ArchivalStamp from '../../components/ui/ArchivalStamp.astro';
+import FrequencyTuner from '../../components/ui/FrequencyTuner.astro';
+import Soundplate from '../../components/song/Soundplate.astro';
+import GatefoldFeature from '../../components/song/GatefoldFeature.astro';
+import SleeveCard from '../../components/song/SleeveCard.astro';
+import { useTranslations } from '../../i18n/utils';
+import { languages, type SupportedLanguage } from '../../i18n/ui';
+import {
+  getFeaturedArticle,
+  getRecentArticles,
+  getAvailableThemes,
+} from '../../data/articles';
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLanguage };
+const t = useTranslations(lang);
+
+const featuredSong = await getFeaturedArticle(lang);
+const recentSongs = await getRecentArticles(lang, featuredSong?.id);
+const availableThemes = await getAvailableThemes(lang);
+---
+
+<BaseLayout
+  title={t('hero.title')}
+  description={t('hero.subtitle')}
+  lang={lang}
+  counterpartUrl={lang === 'id' ? '/en/' : '/id/'}
+>
+  <div class="home-stage">
+    <!-- Asymmetric Soundplate Hero -->
+    <section class="hero-stage" aria-labelledby="hero-title">
+      <div class="container hero-grid">
+        <!-- Hero Typographic Column -->
+        <div class="hero-editorial">
+          <div class="hero-meta-strip">
+            <ArchivalStamp code="ARCHIVE 026" label="432Hz ANALYTICAL MASTER" color="amber" />
+            <span class="hero-format">HIGH-FIDELITY HERMENEUTICS</span>
+          </div>
+
+          <h1 id="hero-title" class="hero-title">
+            <span class="title-line">{lang === 'id' ? 'Arsip Tafsir' : 'The Cyber-Physical'}</span>
+            <span class="title-gradient">{lang === 'id' ? 'Musik & Nada' : 'Liner Notes Archive'}</span>
+          </h1>
+
+          <p class="hero-manifesto-sub">
+            {t('hero.subtitle')}
+          </p>
+
+          <div class="hero-actions">
+            <TactileButton href={`/${lang}/explore/`} variant="primary">
+              <span>{lang === 'id' ? 'Jelajahi Arsip Rekaman' : 'Browse Record Vault'}</span>
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </TactileButton>
+
+            {featuredSong && (
+              <TactileButton href="#featured-stage" variant="secondary">
+                <span>{lang === 'id' ? 'Pilihan Redaksi' : 'Featured Gatefold'}</span>
+              </TactileButton>
+            )}
+          </div>
+        </div>
+
+        <!-- Hero Revolving Soundplate Turntable Deck -->
+        <div class="hero-turntable-deck" aria-hidden="true">
+          <div class="deck-lathe-halo"></div>
+          <Soundplate
+            title={featuredSong?.data.songTitle || featuredSong?.data.title || 'aftertone'}
+            artist={featuredSong?.data.artist || 'Master Tape'}
+            catalogCode="AT-001"
+            size="lg"
+            interactive={true}
+          />
+        </div>
+      </div>
+    </section>
+
+    <!-- Open Gatefold Feature Stage -->
+    {featuredSong && (
+      <section id="featured-stage" class="section-stage featured-stage" aria-label="Curated Featured Song">
+        <div class="container">
+          <div class="stage-header">
+            <div class="stage-tag">
+              <span class="stage-pip" aria-hidden="true"></span>
+              <span>{lang === 'id' ? 'PILIHAN EDISI DELUXE' : 'CURATED DELUXE RELEASE'}</span>
+            </div>
+            <span class="stage-index">TRACK 01 // SIDE A</span>
+          </div>
+
+          <GatefoldFeature song={featuredSong} lang={lang} />
+        </div>
+      </section>
+    )}
+
+    <!-- Crate-Digging Sleeve Rack (Recent Interpretations) -->
+    {recentSongs.length > 0 && (
+      <section class="section-stage crate-stage" aria-label="Recent Interpretations in the Archive">
+        <div class="container">
+          <div class="stage-row">
+            <div class="stage-titles">
+              <div class="stage-tag">
+                <span class="stage-pip" aria-hidden="true"></span>
+                <span>{lang === 'id' ? 'RAK ARSIP REKAMAN' : 'CRATE DIGGING RACK'}</span>
+              </div>
+              <h2 class="section-heading">{t('home.recent.title')}</h2>
+              <p class="section-sub">{t('home.recent.subtitle')}</p>
+            </div>
+
+            <TactileButton href={`/${lang}/explore/`} variant="text" class="view-all-sleeve-btn">
+              <span>{t('home.viewAll')}</span>
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </TactileButton>
+          </div>
+
+          <!-- The Crate Rack Grid -->
+          <div class="crate-rack-grid">
+            {recentSongs.map((song) => (
+              <SleeveCard song={song} lang={lang} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- Emotional Frequency Matrix (Mood Tuner) -->
+    <section class="section-stage tuner-stage" aria-label="Acoustic Frequency Matrix">
+      <div class="container">
+        <div class="tuner-matrix-card">
+          <div class="tuner-header">
+            <span class="tuner-stamp">FREQUENCY MATRIX // 440nm – 680nm</span>
+            <h2 class="tuner-title">{t('home.themes.title')}</h2>
+            <p class="tuner-sub">{t('home.themes.subtitle')}</p>
+          </div>
+
+          <div class="tuner-bars-wrap">
+            {availableThemes.map((theme) => (
+              <FrequencyTuner
+                label={theme.label}
+                href={`/${lang}/explore/?theme=${encodeURIComponent(theme.id)}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .home-stage {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-20);
+    padding-top: var(--space-12);
+  }
+
+  /* Hero Stage */
+  .hero-stage {
+    position: relative;
+    padding-bottom: var(--space-6);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: var(--space-12);
+    align-items: center;
+  }
+
+  .hero-editorial {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .hero-meta-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .hero-format {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.035em;
+    color: var(--color-blue-900);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title-gradient {
+    background:
+      linear-gradient(135deg,
+        var(--color-blue-900) 0%,
+        var(--color-blue-700) 40%,
+        var(--color-amber-500) 100%
+      );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .hero-manifesto-sub {
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink-muted);
+    max-width: 44ch;
+  }
+
+  .hero-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+
+  .btn-pip {
+    color: var(--color-amber-500);
+    font-size: 0.6rem;
+  }
+
+  /* Hero Turntable Deck */
+  .hero-turntable-deck {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-4);
+  }
+
+  .deck-lathe-halo {
+    position: absolute;
+    width: 26rem;
+    height: 26rem;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at center, rgb(56 200 217 / 20%) 0%, transparent 70%);
+    pointer-events: none;
+    filter: blur(24px);
+  }
+
+  /* Stage Headers */
+  .stage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+  }
+
+  .stage-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    color: var(--color-blue-900);
+    letter-spacing: 0.1em;
+  }
+
+  .stage-pip {
+    width: 6px;
+    height: 6px;
+    background: var(--color-amber-500);
+    border-radius: 1px;
+    box-shadow: 0 0 6px rgb(255 123 57 / 80%);
+  }
+
+  .stage-index {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+  }
+
+  /* Crate Rack Section */
+  .stage-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+  }
+
+  .stage-titles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .section-heading {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    color: var(--color-blue-900);
+    letter-spacing: -0.02em;
+  }
+
+  .section-sub {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+  }
+
+  .view-all-sleeve-btn {
+    margin-bottom: var(--space-2);
+  }
+
+  .crate-rack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+    gap: var(--space-8);
+  }
+
+  /* Tuner Matrix Card */
+  .tuner-matrix-card {
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 96%) 0%,
+        rgb(238 252 253 / 85%) 100%
+      );
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sleeve);
+    padding: var(--space-10) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--space-6);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tuner-stamp {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-amber-700);
+    letter-spacing: 0.1em;
+  }
+
+  .tuner-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    color: var(--color-blue-900);
+    letter-spacing: -0.02em;
+    margin-top: 2px;
+  }
+
+  .tuner-sub {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    max-width: 48ch;
+    margin-top: 2px;
+  }
+
+  .tuner-bars-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    max-width: 46rem;
+  }
+
+  @media (max-width: 960px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-turntable-deck {
+      display: none;
+    }
+
+    .stage-row {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

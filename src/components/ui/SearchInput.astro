@@ -1,0 +1,119 @@
+---
+interface Props {
+  id?: string;
+  name?: string;
+  placeholder?: string;
+  label?: string;
+  value?: string;
+  class?: string;
+}
+
+const {
+  id = 'archive-search',
+  name = 'q',
+  placeholder = 'Cari judul lagu atau artis...',
+  label = 'Cari lagu atau artis',
+  value = '',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['search-input-wrapper', className]}>
+  <label for={id} class="sr-only">{label}</label>
+  <div class="search-input-box">
+    <svg
+      class="search-icon"
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+    <input
+      type="search"
+      id={id}
+      name={name}
+      class="search-input"
+      placeholder={placeholder}
+      value={value}
+      autocomplete="off"
+    />
+  </div>
+</div>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  .search-input-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 32rem;
+  }
+
+  .search-input-box {
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: var(--color-white);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-md);
+    box-shadow:
+      inset 0 1px 3px rgb(16 55 71 / 6%),
+      0 4px 12px rgb(16 55 71 / 4%);
+    padding: var(--space-1) var(--space-4);
+    transition:
+      border-color var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
+  }
+
+  .search-input-box:focus-within {
+    border-color: var(--color-aqua-500);
+    box-shadow:
+      0 0 0 3px rgb(56 200 217 / 25%),
+      0 6px 16px rgb(16 55 71 / 8%);
+  }
+
+  .search-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--color-ink-muted);
+    margin-right: var(--space-3);
+    flex-shrink: 0;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: var(--space-2) 0;
+    border: none;
+    background: transparent;
+    color: var(--color-ink);
+    font-size: var(--text-base);
+    outline: none;
+  }
+
+  .search-input::placeholder {
+    color: var(--color-ink-muted);
+    opacity: 0.7;
+  }
+
+  /* Clear button styling */
+  .search-input::-webkit-search-cancel-button {
+    cursor: pointer;
+  }
+</style>

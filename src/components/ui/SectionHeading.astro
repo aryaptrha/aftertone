@@ -1,0 +1,119 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  eyebrow?: string;
+  align?: 'left' | 'center';
+  class?: string;
+}
+
+const {
+  title,
+  subtitle,
+  eyebrow,
+  align = 'left',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['section-heading', `section-heading--${align}`, className]}>
+  {eyebrow && (
+    <div class="section-heading__eyebrow">
+      <span class="eyebrow-accent" aria-hidden="true"></span>
+      <span>{eyebrow}</span>
+    </div>
+  )}
+  <h2 class="section-heading__title">{title}</h2>
+  {subtitle && <p class="section-heading__subtitle">{subtitle}</p>}
+  <div class="section-heading__divider" aria-hidden="true">
+    <div class="divider-line"></div>
+    <div class="divider-gem"></div>
+  </div>
+</div>
+
+<style>
+  .section-heading {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--space-8);
+  }
+
+  .section-heading--left {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .section-heading--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .section-heading__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-orange-700);
+    margin-bottom: var(--space-2);
+  }
+
+  .eyebrow-accent {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--color-orange-500);
+    box-shadow: 0 0 6px rgb(255 120 62 / 50%);
+  }
+
+  .section-heading__title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: var(--leading-heading);
+    color: var(--color-ink);
+    letter-spacing: -0.015em;
+  }
+
+  .section-heading__subtitle {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    max-width: 48ch;
+    margin-top: var(--space-2);
+    line-height: 1.5;
+  }
+
+  .section-heading__divider {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 8rem;
+    margin-top: var(--space-4);
+  }
+
+  .section-heading--center .section-heading__divider {
+    justify-content: center;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--color-aqua-500), transparent);
+    border-radius: 1px;
+  }
+
+  .section-heading--center .divider-line {
+    background: linear-gradient(90deg, transparent, var(--color-aqua-500), transparent);
+  }
+
+  .divider-gem {
+    width: 6px;
+    height: 6px;
+    background: var(--color-aqua-300);
+    border: 1px solid var(--color-blue-700);
+    transform: rotate(45deg);
+    box-shadow: 0 0 5px rgb(139 232 242 / 60%);
+  }
+</style>

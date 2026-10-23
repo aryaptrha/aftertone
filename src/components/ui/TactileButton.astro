@@ -1,0 +1,34 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'primary' | 'secondary' | 'accent' | 'text';
+  class?: string;
+  type?: 'button' | 'submit' | 'reset';
+  id?: string;
+  target?: string;
+  rel?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  class: className = '',
+  type = 'button',
+  id,
+  target,
+  rel,
+} = Astro.props;
+
+const Element = href ? 'a' : 'button';
+const buttonProps = href
+  ? { href, target, rel: target === '_blank' ? 'noopener noreferrer' : rel }
+  : { type };
+---
+
+<Element
+  id={id}
+  class:list={['tactile-btn', `tactile-btn--${variant}`, className]}
+  {...buttonProps}
+>
+  <slot />
+</Element>

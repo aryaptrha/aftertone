@@ -1,0 +1,805 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Soundplate from '../components/song/Soundplate.astro';
+import FrequencyTuner from '../components/ui/FrequencyTuner.astro';
+import ArchivalStamp from '../components/ui/ArchivalStamp.astro';
+import SleeveCard from '../components/song/SleeveCard.astro';
+import { useTranslations, formatDate } from '../i18n/utils';
+import type { SupportedLanguage } from '../i18n/ui';
+import { getGenreLabel } from '../data/genres';
+import { getThemeLabel } from '../data/themes';
+
+import type { Article } from '../data/articles';
+
+interface Props {
+  song: Article;
+  counterpartUrl?: string;
+  relatedSongs?: Article[];
+}
+
+const { song, counterpartUrl, relatedSongs = [] } = Astro.props;
+const lang = song.data.language;
+const t = useTranslations(lang);
+const catCode = song.data.catalogCode;
+const displaySongTitle = song.data.songTitle || song.data.title;
+const displayDate = song.data.publishedAt;
+const genreLabel = getGenreLabel(song.data.genre, lang);
+const readTime = song.data.readTimeMinutes;
+---
+
+<BaseLayout
+  title={`${song.data.title} — ${song.data.artist}`}
+  description={song.data.description || song.data.summary}
+  lang={lang}
+  counterpartUrl={counterpartUrl}
+  type="article"
+>
+  <div class="dual-track-page">
+    <div class="container">
+      <!-- Breadcrumb Archival Stamp -->
+      <nav class="archival-breadcrumbs" aria-label="Catalog Navigation">
+        <a href={`/${lang}/`} class="crumb-link">01. {t('nav.home')}</a>
+        <span class="crumb-slash" aria-hidden="true">//</span>
+        <a href={`/${lang}/explore/`} class="crumb-link">02. {t('nav.explore')}</a>
+        <span class="crumb-slash" aria-hidden="true">//</span>
+        <span class="crumb-active">{song.data.title}</span>
+      </nav>
+
+      <!-- The Dual-Track Stage -->
+      <div class="dual-track-grid">
+        <!-- TRACK A: Sticky Anatomical Audio Stem -->
+        <aside class="track-stem" aria-label="Song Anatomy & Audio Stems">
+          <div class="track-stem__sticky" data-stem-sticky>
+            <!-- Needle Progress Rail (ScrollTrigger Indicator) -->
+            <div class="needle-rail" aria-hidden="true">
+              <div class="needle-track"></div>
+              <div class="needle-head" data-needle-head>
+                <span class="needle-pip"></span>
+              </div>
+            </div>
+
+            <!-- Revolving Soundplate Turntable -->
+            <div class="stem-soundplate-wrap">
+              <Soundplate
+                title={displaySongTitle}
+                artist={song.data.artist}
+                catalogCode={catCode}
+                size="md"
+                interactive={true}
+              />
+            </div>
+
+            <!-- Stem Telemetry Matrix -->
+            <div class="stem-telemetry">
+              <div class="telemetry-row">
+                <span class="telemetry-k">CATALOG NO.</span>
+                <span class="telemetry-v">{catCode} // LP</span>
+              </div>
+              <div class="telemetry-row">
+                <span class="telemetry-k">ACOUSTIC SPEED</span>
+                <span class="telemetry-v">33⅓ RPM STEREO</span>
+              </div>
+              {genreLabel && (
+                <div class="telemetry-row">
+                  <span class="telemetry-k">GENRE STAMP</span>
+                  <span class="telemetry-v">{genreLabel}</span>
+                </div>
+              )}
+              {readTime && (
+                <div class="telemetry-row">
+                  <span class="telemetry-k">ENGAGEMENT</span>
+                  <span class="telemetry-v">{readTime} {t('song.readTime')}</span>
+                </div>
+              )}
+            </div>
+
+            <!-- Emotional Frequency Spectrum Tuners -->
+            <div class="stem-frequencies">
+              <span class="freq-heading">ACOUSTIC RESONANCE:</span>
+              <div class="freq-list">
+                {song.data.themes.map((theme) => (
+                  <FrequencyTuner
+                    label={getThemeLabel(theme, lang)}
+                    href={`/${lang}/explore/?theme=${encodeURIComponent(theme)}`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <!-- Streaming Turntables -->
+            {song.data.listenLinks && (
+              <div class="stem-listen-deck">
+                <span class="listen-heading">TURNTABLE STREAMS:</span>
+                <div class="listen-pills">
+                  {song.data.listenLinks.spotify && (
+                    <a
+                      href={song.data.listenLinks.spotify}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="turntable-link"
+                    >
+                      <span class="link-disc" aria-hidden="true">●</span>
+                      <span>Spotify</span>
+                    </a>
+                  )}
+                  {song.data.listenLinks.youtube && (
+                    <a
+                      href={song.data.listenLinks.youtube}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="turntable-link"
+                    >
+                      <span class="link-disc" aria-hidden="true">●</span>
+                      <span>YouTube</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </aside>
+
+        <!-- TRACK B: The Hermeneutic Essay (Liner Notes Paper) -->
+        <article class="track-prose" id="hermeneutic-essay">
+          <!-- Article Title Header -->
+          <header class="prose-header">
+            <div class="header-stamp-bar">
+              <ArchivalStamp code={catCode} label="ESSAY HERMENEUTICS" color="amber" />
+              {displayDate && (
+                <span class="prose-date">
+                  RECORDED // {formatDate(displayDate, lang)}
+                </span>
+              )}
+            </div>
+
+            <h1 class="prose-title">{song.data.title}</h1>
+
+            <div class="prose-byline">
+              {song.data.songTitle && song.data.songTitle !== song.data.title && (
+                <span class="by-song">{song.data.songTitle}</span>
+              )}
+              <span class="by-tag">{t('song.by')}</span>
+              <span class="by-artist">{song.data.artist}</span>
+            </div>
+
+            <!-- Intimate Liner Summary Callout -->
+            <div class="liner-abstract">
+              <div class="abstract-badge">
+                <span class="badge-dot" aria-hidden="true"></span>
+                <span>{lang === 'id' ? 'INTISARI TAFSIR' : 'HERMENEUTIC ABSTRACT'}</span>
+              </div>
+              <p class="abstract-text">{song.data.summary}</p>
+            </div>
+          </header>
+
+          <!-- Main Essay Body -->
+          <div class="prose-body" data-prose-body>
+            <slot />
+          </div>
+
+          <!-- Archival Verification & Colophon -->
+          {song.data.sources && song.data.sources.length > 0 && (
+            <section class="sources-colophon" aria-label="Archival Sources & Verification">
+              <div class="colophon-header">
+                <span class="colophon-pip" aria-hidden="true"></span>
+                <h3>{lang === 'id' ? 'Sumber & Rujukan Konteks' :'Archival Sources & Contextual Verification'}</h3>
+              </div>
+              <ul class="colophon-list">
+                {song.data.sources.map((source) => (
+                  <li class="colophon-item">
+                    <span class="source-bullet" aria-hidden="true">§</span>
+                    <div class="source-info">
+                      {source.url ? (
+                        <a href={source.url} target="_blank" rel="noopener noreferrer" class="source-link">
+                          {source.label}
+                        </a>
+                      ) : (
+                        <span class="source-title">{source.label}</span>
+                      )}
+                      {source.publisher && (
+                        <span class="source-publisher">
+                          {source.publisher}{source.accessedAt ? ` • ${source.accessedAt}` : ''}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <!-- Related Sleeves In The Archive -->
+          {relatedSongs.length > 0 && (
+            <section class="related-sleeves" aria-label="Related Sleeves in the Archive">
+              <div class="related-header">
+                <span class="related-badge">NEXT IN VAULT</span>
+                <h3 class="related-title">{lang === 'id' ? 'Interpretasi Terkait' : 'Related Liner Notes'}</h3>
+              </div>
+              <div class="related-grid">
+                {relatedSongs.map((related) => (
+                  <SleeveCard song={related} lang={lang} />
+                ))}
+              </div>
+            </section>
+          )}
+        </article>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import gsap from 'gsap';
+  import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initDualTrackScroll() {
+    const prose = document.querySelector<HTMLElement>('[data-prose-body]');
+    const needleHead = document.querySelector<HTMLElement>('[data-needle-head]');
+
+    if (!prose || !needleHead) return;
+
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) return;
+
+    // ScrollTrigger to animate reading needle down the rail
+    ScrollTrigger.create({
+      trigger: prose,
+      start: 'top 30%',
+      end: 'bottom 80%',
+      scrub: 0.3,
+      onUpdate: (self) => {
+        const progressPercent = self.progress * 100;
+        needleHead.style.top = `${progressPercent}%`;
+      },
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initDualTrackScroll);
+  } else {
+    initDualTrackScroll();
+  }
+  document.addEventListener('astro:page-load', initDualTrackScroll);
+</script>
+
+<style>
+  .dual-track-page {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-20);
+  }
+
+  /* Breadcrumb Stamp */
+  .archival-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    margin-bottom: var(--space-6);
+  }
+
+  .crumb-link {
+    color: var(--color-ink-muted);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-tactile);
+  }
+
+  .crumb-link:hover {
+    color: var(--color-blue-900);
+  }
+
+  .crumb-slash {
+    color: var(--color-border);
+  }
+
+  .crumb-active {
+    color: var(--color-blue-900);
+    max-width: 25ch;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Dual-Track Grid Layout */
+  .dual-track-grid {
+    display: grid;
+    grid-template-columns: 20rem 1fr;
+    gap: var(--space-10);
+    align-items: flex-start;
+    position: relative;
+  }
+
+  /* TRACK A: Sticky Anatomical Stem */
+  .track-stem {
+    position: sticky;
+    top: var(--space-8);
+    z-index: 10;
+  }
+
+  .track-stem__sticky {
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 96%) 0%,
+        rgb(238 252 253 / 88%) 100%
+      );
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sleeve);
+    padding: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Scroll Needle Rail */
+  .needle-rail {
+    position: absolute;
+    left: 8px;
+    top: var(--space-6);
+    bottom: var(--space-6);
+    width: 6px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .needle-track {
+    width: 2px;
+    height: 100%;
+    background: rgb(56 200 217 / 25%);
+    border-radius: 1px;
+  }
+
+  .needle-head {
+    position: absolute;
+    top: 0%;
+    width: 8px;
+    height: 8px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .needle-pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-amber-500);
+    box-shadow: 0 0 8px rgb(255 123 57 / 90%);
+  }
+
+  .stem-soundplate-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: var(--space-2);
+  }
+
+  .stem-telemetry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block: var(--space-3);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+  }
+
+  .telemetry-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .telemetry-k {
+    color: var(--color-ink-muted);
+    font-weight: 600;
+  }
+
+  .telemetry-v {
+    color: var(--color-blue-900);
+    font-weight: 700;
+  }
+
+  .stem-frequencies {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .freq-heading {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.08em;
+  }
+
+  .freq-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .stem-listen-deck {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .listen-heading {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--color-amber-700);
+    letter-spacing: 0.08em;
+  }
+
+  .listen-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .turntable-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-blue-900);
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-aqua-500);
+    padding: 3px 8px;
+    border-radius: var(--radius-xs);
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgb(16 59 82 / 5%);
+    transition: all var(--motion-fast) var(--ease-tactile);
+  }
+
+  .turntable-link:hover {
+    background: var(--color-blue-900);
+    color: var(--color-sleeve);
+    transform: translateY(-1px);
+  }
+
+  .link-disc {
+    color: var(--color-amber-500);
+    font-size: 0.5rem;
+  }
+
+  /* TRACK B: The Hermeneutic Essay */
+  .track-prose {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .prose-header {
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sleeve);
+    padding: var(--space-8) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .header-stamp-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .prose-date {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .prose-title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.03em;
+    color: var(--color-blue-900);
+  }
+
+  .prose-byline {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .by-song {
+    font-weight: 700;
+    color: var(--color-blue-900);
+    padding: 1px 6px;
+    background: var(--color-aqua-100);
+    border-radius: var(--radius-xs);
+    border: 1px solid rgb(56 200 217 / 35%);
+    font-size: var(--text-sm);
+  }
+
+  .by-tag {
+    font-size: var(--text-xs);
+    opacity: 0.8;
+  }
+
+  .by-artist {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  /* Abstract Box */
+  .liner-abstract {
+    background:
+      linear-gradient(135deg,
+        rgb(221 248 250 / 60%) 0%,
+        rgb(255 240 230 / 40%) 100%
+      );
+    border: 1px solid rgb(56 200 217 / 35%);
+    border-radius: var(--radius-md);
+    padding: var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .abstract-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--color-amber-700);
+    letter-spacing: 0.08em;
+  }
+
+  .abstract-badge .badge-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 1px;
+    background: var(--color-amber-500);
+  }
+
+  .abstract-text {
+    font-size: var(--text-base);
+    line-height: 1.65;
+    color: var(--color-ink);
+    font-style: italic;
+  }
+
+  /* Body Content Styling */
+  .prose-body {
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sleeve);
+    padding: var(--space-10) var(--space-10);
+    font-family: var(--font-prose);
+    font-size: var(--text-lg);
+    line-height: var(--leading-body);
+    color: var(--color-ink);
+  }
+
+  .prose-body :global(h2) {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    line-height: var(--leading-heading);
+    color: var(--color-blue-900);
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-2);
+    border-bottom: 2px solid var(--color-aqua-100);
+    letter-spacing: -0.015em;
+  }
+
+  .prose-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .prose-body :global(h3) {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-top: var(--space-6);
+    margin-bottom: var(--space-2);
+  }
+
+  .prose-body :global(p) {
+    margin-bottom: var(--space-6);
+  }
+
+  .prose-body :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .prose-body :global(blockquote) {
+    position: relative;
+    margin-block: var(--space-8);
+    padding: var(--space-5) var(--space-6);
+    background:
+      linear-gradient(90deg,
+        rgb(221 248 250 / 80%) 0%,
+        rgb(244 248 247 / 40%) 100%
+      );
+    border-left: 3px solid var(--color-amber-500);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    font-size: var(--text-lg);
+    font-style: italic;
+    color: var(--color-blue-900);
+    line-height: 1.68;
+    box-shadow: 0 2px 8px rgb(16 59 82 / 4%);
+  }
+
+  .prose-body :global(ul),
+  .prose-body :global(ol) {
+    margin-bottom: var(--space-6);
+    padding-left: var(--space-6);
+  }
+
+  .prose-body :global(li) {
+    margin-bottom: var(--space-2);
+  }
+
+  /* Sources Colophon */
+  .sources-colophon {
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-8);
+    box-shadow: var(--shadow-sleeve);
+  }
+
+  .colophon-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+  }
+
+  .colophon-header h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-base);
+    font-weight: 800;
+    color: var(--color-blue-900);
+    letter-spacing: -0.01em;
+  }
+
+  .colophon-pip {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--color-aqua-500);
+  }
+
+  .colophon-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .colophon-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+  }
+
+  .source-bullet {
+    font-family: var(--font-mono);
+    color: var(--color-amber-500);
+    font-weight: 700;
+  }
+
+  .source-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .source-title {
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .source-link {
+    font-weight: 600;
+    color: var(--color-blue-700);
+    text-decoration: underline;
+    transition: color var(--motion-fast) var(--ease-tactile);
+  }
+
+  .source-link:hover {
+    color: var(--color-blue-900);
+  }
+
+  .source-publisher {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    color: var(--color-amber-700);
+    font-weight: 600;
+  }
+
+    font-size: var(--text-xs);
+    color: var(--color-ink-muted);
+  }
+
+  /* Related Sleeves */
+  .related-sleeves {
+    margin-top: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .related-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .related-badge {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--color-amber-700);
+    background: rgb(255 240 230 / 90%);
+    padding: 2px 6px;
+    border-radius: var(--radius-xs);
+    border: 1px solid rgb(255 123 57 / 40%);
+  }
+
+  .related-title {
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    color: var(--color-blue-900);
+  }
+
+  .related-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--space-6);
+  }
+
+  @media (max-width: 992px) {
+    .dual-track-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .track-stem {
+      position: static;
+    }
+
+    .needle-rail {
+      display: none;
+    }
+
+    .prose-body {
+      padding: var(--space-6) var(--space-4);
+    }
+  }
+</style>

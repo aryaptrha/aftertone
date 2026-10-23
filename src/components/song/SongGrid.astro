@@ -1,0 +1,36 @@
+---
+interface Props {
+  columns?: 2 | 3;
+  id?: string;
+  class?: string;
+}
+
+const { columns = 3, id, class: className = '' } = Astro.props;
+---
+
+<div id={id} class:list={['song-grid', `song-grid--cols-${columns}`, className]}>
+  <slot />
+</div>
+
+<style>
+  .song-grid {
+    display: grid;
+    gap: var(--space-6);
+    width: 100%;
+  }
+
+  .song-grid--cols-3 {
+    grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  }
+
+  .song-grid--cols-2 {
+    grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr));
+  }
+
+  @media (max-width: 640px) {
+    .song-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+  }
+</style>

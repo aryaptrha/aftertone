@@ -1,0 +1,265 @@
+---
+import ThemeTag from '../ui/ThemeTag.astro';
+import { useTranslations } from '../../i18n/utils';
+import type { SupportedLanguage } from '../../i18n/ui';
+import { getGenreLabel } from '../../data/genres';
+import { getThemeLabel } from '../../data/themes';
+import type { Article } from '../../data/articles';
+
+interface Props {
+  song: Article;
+  lang: SupportedLanguage;
+  class?: string;
+}
+
+const { song, lang, class: className = '' } = Astro.props;
+const t = useTranslations(lang);
+const songHref = `/${lang}/songs/${song.data.slug}/`;
+const genreLabel = getGenreLabel(song.data.genre, lang);
+const readTime = song.data.readTimeMinutes;
+---
+
+<article
+  class:list={['song-card', className]}
+  data-title={song.data.title.toLowerCase()}
+  data-song-title={(song.data.songTitle || song.data.title).toLowerCase()}
+  data-artist={song.data.artist.toLowerCase()}
+  data-themes={song.data.themes.join(',').toLowerCase()}
+>
+  <div class="song-card__surface">
+    <!-- Visual Soundcard Cartridge Header -->
+    <div class="song-card__banner" aria-hidden="true">
+      <div class="banner-gradient"></div>
+      <div class="disc-plate">
+        <div class="disc-inner">
+          <span class="disc-dot"></span>
+        </div>
+      </div>
+      <div class="banner-badge">
+        <span>{genreLabel}</span>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="song-card__body">
+      <div class="song-card__tags">
+        {song.data.themes.slice(0, 2).map((theme) => (
+          <ThemeTag label={getThemeLabel(theme, lang)} href={`/${lang}/explore/?theme=${encodeURIComponent(theme)}`} />
+        ))}
+      </div>
+
+      <h3 class="song-card__title">
+        <a href={songHref}>{song.data.title}</a>
+      </h3>
+
+      <p class="song-card__artist">
+        {t('song.by')} <span class="artist-bold">{song.data.artist}</span>
+      </p>
+
+      <p class="song-card__summary">{song.data.summary}</p>
+
+      <div class="song-card__meta">
+        <a href={songHref} class="read-link">
+          <span>{t('song.read')}</span>
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </a>
+
+        {readTime && (
+          <span class="read-time-tag">
+            {readTime} {t('song.readTime')}
+          </span>
+        )}
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .song-card {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: var(--color-white);
+    border: 1px solid var(--color-line);
+    box-shadow: var(--shadow-card);
+    transition:
+      transform var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard),
+      border-color var(--motion-fast) var(--ease-standard);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .song-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-raised);
+    border-color: var(--color-aqua-500);
+  }
+
+  .song-card__surface {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .song-card__banner {
+    position: relative;
+    height: 6.5rem;
+    background:
+      linear-gradient(135deg, var(--color-aqua-100), var(--color-aqua-300));
+    border-bottom: 1px solid var(--color-line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .banner-gradient {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 80% 20%, rgb(255 120 62 / 20%), transparent 50%),
+      radial-gradient(circle at 20% 80%, rgb(255 255 255 / 60%), transparent 60%);
+  }
+
+  .disc-plate {
+    position: relative;
+    width: 4.8rem;
+    height: 3.6rem;
+    border-radius: var(--radius-sm);
+    background:
+      linear-gradient(135deg, rgb(255 255 255 / 95%), rgb(184 240 244 / 85%));
+    border: 1px solid rgb(255 255 255 / 95%);
+    box-shadow: 0 4px 10px rgb(16 55 71 / 10%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+  }
+
+  .disc-inner {
+    width: 2.2rem;
+    height: 1.4rem;
+    border-radius: var(--radius-xs);
+    background: var(--color-aqua-200);
+    border: 1px dashed var(--color-blue-700);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .disc-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 1px;
+    background: var(--color-orange-500);
+    box-shadow: 0 0 4px rgb(255 120 62 / 80%);
+  }
+
+  .banner-badge {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-3);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-blue-900);
+    background: rgb(255 255 255 / 85%);
+    padding: 2px 8px;
+    border-radius: var(--radius-xs);
+    border: 1px solid rgb(214 227 229 / 80%);
+    backdrop-filter: blur(4px);
+  }
+
+  .song-card__body {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: var(--space-3);
+  }
+
+  .song-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .song-card__title {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    line-height: var(--leading-heading);
+    letter-spacing: -0.01em;
+  }
+
+  .song-card__title a {
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-standard);
+  }
+
+  .song-card__title a:hover {
+    color: var(--color-blue-700);
+  }
+
+  .song-card__artist {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    margin-top: calc(-1 * var(--space-1));
+  }
+
+  .artist-bold {
+    font-weight: 700;
+    color: var(--color-blue-900);
+  }
+
+  .song-card__summary {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    flex-grow: 1;
+  }
+
+  .song-card__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-line);
+    margin-top: auto;
+  }
+
+  .read-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-blue-700);
+    text-decoration: none;
+  }
+
+  .read-link:hover {
+    color: var(--color-blue-900);
+    text-decoration: underline;
+  }
+
+  .read-time-tag {
+    font-size: var(--text-xs);
+    color: var(--color-ink-muted);
+    font-weight: 500;
+  }
+</style>

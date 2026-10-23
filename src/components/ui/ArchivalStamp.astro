@@ -1,0 +1,84 @@
+---
+interface Props {
+  code: string;
+  label?: string;
+  color?: 'aqua' | 'amber' | 'neutral';
+  class?: string;
+}
+
+const {
+  code,
+  label,
+  color = 'aqua',
+  class: className = '',
+} = Astro.props;
+---
+
+<div class:list={['archival-stamp', `stamp--${color}`, className]}>
+  <span class="stamp-pip" aria-hidden="true"></span>
+  <span class="stamp-code">{code}</span>
+  {label && <span class="stamp-label">{label}</span>}
+</div>
+
+<style>
+  .archival-stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    user-select: none;
+    width: fit-content;
+    box-shadow: 0 1px 3px rgb(16 59 82 / 5%);
+  }
+
+  .stamp-pip {
+    width: 4px;
+    height: 4px;
+    border-radius: 1px;
+    flex-shrink: 0;
+  }
+
+  /* Colors */
+  .stamp--aqua {
+    background: rgb(221 248 250 / 80%);
+    color: var(--color-blue-900);
+    border: 1px solid rgb(56 200 217 / 45%);
+  }
+  .stamp--aqua .stamp-pip {
+    background: var(--color-aqua-500);
+    box-shadow: 0 0 4px rgb(56 200 217 / 80%);
+  }
+
+  .stamp--amber {
+    background: rgb(255 240 230 / 90%);
+    color: var(--color-amber-700);
+    border: 1px solid rgb(255 123 57 / 45%);
+  }
+  .stamp--amber .stamp-pip {
+    background: var(--color-amber-500);
+    box-shadow: 0 0 4px rgb(255 123 57 / 80%);
+  }
+
+  .stamp--neutral {
+    background: var(--color-sleeve);
+    color: var(--color-ink-muted);
+    border: 1px solid var(--color-border);
+  }
+  .stamp--neutral .stamp-pip {
+    background: var(--color-ink-muted);
+  }
+
+  .stamp-code {
+    text-transform: uppercase;
+  }
+
+  .stamp-label {
+    opacity: 0.75;
+    margin-left: 2px;
+  }
+</style>

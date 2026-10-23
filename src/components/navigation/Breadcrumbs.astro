@@ -1,0 +1,93 @@
+---
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+  class?: string;
+}
+
+const { items, class: className = '' } = Astro.props;
+---
+
+<nav aria-label="Breadcrumb" class:list={['breadcrumbs', className]}>
+  <ol class="breadcrumbs__list">
+    {
+      items.map((item, index) => {
+        const isLast = index === items.length - 1;
+        return (
+          <li class="breadcrumbs__item">
+            {isLast || !item.href ? (
+              <span class="breadcrumbs__current" aria-current="page">
+                {item.label}
+              </span>
+            ) : (
+              <a href={item.href} class="breadcrumbs__link">
+                {item.label}
+              </a>
+            )}
+            {!isLast && (
+              <span class="breadcrumbs__separator" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <path
+                    d="M4.5 2.5L8 6L4.5 9.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+            )}
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>
+
+<style>
+  .breadcrumbs {
+    font-size: var(--text-sm);
+    color: var(--color-ink-muted);
+    margin-bottom: var(--space-6);
+  }
+
+  .breadcrumbs__list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    list-style: none;
+    gap: var(--space-2);
+  }
+
+  .breadcrumbs__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .breadcrumbs__link {
+    color: var(--color-blue-700);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-standard);
+  }
+
+  .breadcrumbs__link:hover {
+    color: var(--color-blue-900);
+    text-decoration: underline;
+  }
+
+  .breadcrumbs__current {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+
+  .breadcrumbs__separator {
+    color: var(--color-line);
+    display: inline-flex;
+    align-items: center;
+  }
+</style>

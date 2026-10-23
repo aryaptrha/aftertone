@@ -1,0 +1,118 @@
+---
+interface Props {
+  position?: 'top-left' | 'top-right' | 'center-right' | 'bottom-left';
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'aqua' | 'orange' | 'mint';
+  class?: string;
+}
+
+const {
+  position = 'top-left',
+  size = 'md',
+  color = 'aqua',
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'decorative-orb',
+    `decorative-orb--${position}`,
+    `decorative-orb--${size}`,
+    `decorative-orb--${color}`,
+    className,
+  ]}
+  aria-hidden="true"
+>
+  <div class="orb-core"></div>
+  <div class="orb-highlight"></div>
+</div>
+
+<style>
+  .decorative-orb {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 0;
+    filter: blur(48px);
+    opacity: 0.65;
+  }
+
+  /* Sizes */
+  .decorative-orb--sm {
+    width: 14rem;
+    height: 14rem;
+  }
+
+  .decorative-orb--md {
+    width: 24rem;
+    height: 24rem;
+  }
+
+  .decorative-orb--lg {
+    width: 36rem;
+    height: 36rem;
+  }
+
+  /* Positions */
+  .decorative-orb--top-left {
+    top: -6rem;
+    left: -6rem;
+  }
+
+  .decorative-orb--top-right {
+    top: 4rem;
+    right: -8rem;
+  }
+
+  .decorative-orb--center-right {
+    top: 45%;
+    right: -10rem;
+  }
+
+  .decorative-orb--bottom-left {
+    bottom: 5%;
+    left: -8rem;
+  }
+
+  /* Colors */
+  .decorative-orb--aqua {
+    background: radial-gradient(
+      circle,
+      var(--color-aqua-300) 0%,
+      var(--color-aqua-200) 45%,
+      transparent 70%
+    );
+  }
+
+  .decorative-orb--orange {
+    background: radial-gradient(
+      circle,
+      var(--color-orange-400) 0%,
+      var(--color-orange-500) 30%,
+      transparent 70%
+    );
+    opacity: 0.35;
+  }
+
+  .decorative-orb--mint {
+    background: radial-gradient(
+      circle,
+      var(--color-mint-100) 0%,
+      var(--color-aqua-100) 50%,
+      transparent 70%
+    );
+    opacity: 0.55;
+  }
+
+  @media (max-width: 768px) {
+    .decorative-orb {
+      opacity: 0.35;
+      filter: blur(32px);
+    }
+    .decorative-orb--lg {
+      width: 18rem;
+      height: 18rem;
+    }
+  }
+</style>

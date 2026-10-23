@@ -1,0 +1,449 @@
+---
+import TactileButton from '../ui/TactileButton.astro';
+import FrequencyTuner from '../ui/FrequencyTuner.astro';
+import ArchivalStamp from '../ui/ArchivalStamp.astro';
+import Soundplate from './Soundplate.astro';
+import { useTranslations } from '../../i18n/utils';
+import type { SupportedLanguage } from '../../i18n/ui';
+import { getGenreLabel } from '../../data/genres';
+import { getThemeLabel } from '../../data/themes';
+
+import type { Article } from '../../data/articles';
+
+interface Props {
+  song: Article;
+  lang: SupportedLanguage;
+  class?: string;
+}
+
+const { song, lang, class: className = '' } = Astro.props;
+const t = useTranslations(lang);
+const songHref = `/${lang}/songs/${song.data.slug}/`;
+const catCode = song.data.catalogCode;
+const displayTitle = song.data.songTitle || song.data.title;
+const genreLabel = getGenreLabel(song.data.genre, lang);
+const readTime = song.data.readTimeMinutes;
+---
+
+<article class:list={['gatefold-feature', className]} data-gatefold>
+  <div class="gatefold-chassis" data-gatefold-chassis>
+    <!-- Left Panel: Collector's Album Cover & Vinyl Turntable Platter -->
+    <div class="gatefold-panel gatefold-panel--visual">
+      <div class="visual-inner">
+        <div class="visual-header">
+          <ArchivalStamp code="DELUXE EDITION" label={catCode} color="amber" />
+          <span class="visual-format">33⅓ RPM // STEREO</span>
+        </div>
+
+        <!-- Turntable Platter Visual -->
+        <div class="visual-turntable">
+          <Soundplate
+            title={displayTitle}
+            artist={song.data.artist}
+            catalogCode={catCode}
+            size="md"
+            interactive={true}
+          />
+        </div>
+
+        <!-- Audio Telemetry Readout -->
+        <div class="visual-telemetry">
+          <div class="telemetry-item">
+            <span class="telemetry-label">GENRE MATRIX</span>
+            <span class="telemetry-val">{genreLabel}</span>
+          </div>
+          <div class="telemetry-item">
+            <span class="telemetry-label">ACOUSTIC SPEED</span>
+            <span class="telemetry-val">432Hz ANALYTICAL MASTER</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel: The Liner Notes Insert -->
+    <div class="gatefold-panel gatefold-panel--notes">
+      <div class="notes-header">
+        <div class="notes-badge">
+          <span class="badge-pip" aria-hidden="true">★</span>
+          <span>{lang === 'id' ? 'KARYA PILIHAN' : 'CURATED FEATURED LINER'}</span>
+        </div>
+
+        <div class="notes-frequencies">
+          {song.data.themes.slice(0, 2).map((theme) => (
+            <FrequencyTuner
+              label={getThemeLabel(theme, lang)}
+              href={`/${lang}/explore/?theme=${encodeURIComponent(theme)}`}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div class="notes-titles">
+        <h2 class="notes-title">
+          <a href={songHref}>{song.data.title}</a>
+        </h2>
+        <p class="notes-artist">
+          <span class="artist-by">{t('song.by')}</span>
+          <span class="artist-highlight">{song.data.artist}</span>
+        </p>
+      </div>
+
+      <p class="notes-summary">{song.data.summary}</p>
+
+      <div class="notes-footer">
+        <div class="action-row">
+          <TactileButton href={songHref} variant="primary">
+            <span>{lang === 'id' ? 'Baca Analisis Lengkap' : 'Read Full Liner Notes'}</span>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path
+                d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </TactileButton>
+
+          {readTime && (
+            <span class="read-telemetry">
+              <span class="clock-pin" aria-hidden="true">⏱</span>
+              {readTime} {t('song.readTime')}
+            </span>
+          )}
+        </div>
+
+        <!-- Quick Streaming Turntable Links -->
+        {song.data.listenLinks && (
+          <div class="streaming-links">
+            <span class="stream-label">{lang === 'id' ? 'Dengarkan:' : 'Listen:'}</span>
+            {song.data.listenLinks.spotify && (
+              <a href={song.data.listenLinks.spotify} target="_blank" rel="noopener noreferrer" class="stream-pill">
+                Spotify
+              </a>
+            )}
+            {song.data.listenLinks.youtube && (
+              <a href={song.data.listenLinks.youtube} target="_blank" rel="noopener noreferrer" class="stream-pill">
+                YouTube
+              </a>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+</article>
+
+<script>
+  import gsap from 'gsap';
+
+  function initGatefold() {
+    const gatefolds = document.querySelectorAll<HTMLElement>('[data-gatefold]');
+
+    gatefolds.forEach((gf) => {
+      const chassis = gf.querySelector<HTMLElement>('[data-gatefold-chassis]');
+      if (!chassis) return;
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) return;
+
+      const quickX = gsap.quickTo(chassis, 'rotateY', { duration: 0.5, ease: 'power2.out' });
+      const quickY = gsap.quickTo(chassis, 'rotateX', { duration: 0.5, ease: 'power2.out' });
+
+      gf.addEventListener('mousemove', (e) => {
+        const rect = gf.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const xNorm = (mouseX / rect.width) * 2 - 1;
+        const yNorm = (mouseY / rect.height) * 2 - 1;
+
+        quickX(xNorm * 4);  // Mild 3D tilt Y
+        quickY(-yNorm * 4); // Mild 3D tilt X
+      });
+
+      gf.addEventListener('mouseleave', () => {
+        quickX(0);
+        quickY(0);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGatefold);
+  } else {
+    initGatefold();
+  }
+  document.addEventListener('astro:page-load', initGatefold);
+</script>
+
+<style>
+  .gatefold-feature {
+    position: relative;
+    perspective: 1400px;
+    width: 100%;
+  }
+
+  .gatefold-chassis {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr;
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-gatefold-hover);
+    overflow: hidden;
+    transform-style: preserve-3d;
+    transition:
+      border-color var(--motion-fast) var(--ease-tactile),
+      box-shadow var(--motion-fast) var(--ease-tactile);
+  }
+
+  .gatefold-feature:hover .gatefold-chassis {
+    border-color: var(--color-aqua-500);
+  }
+
+  /* Left Panel (Turntable Platter) */
+  .gatefold-panel--visual {
+    background:
+      linear-gradient(135deg,
+        rgb(221 248 250 / 80%) 0%,
+        rgb(244 248 247 / 70%) 50%,
+        rgb(255 240 230 / 60%) 100%
+      );
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .visual-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    height: 100%;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+  }
+
+  .visual-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .visual-format {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .visual-turntable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2);
+  }
+
+  .visual-telemetry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: var(--space-3);
+    border-top: 1px dashed rgb(56 200 217 / 40%);
+  }
+
+  .telemetry-item {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .telemetry-label {
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.05em;
+  }
+
+  .telemetry-val {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-blue-900);
+  }
+
+  /* Right Panel (Liner Notes Insert) */
+  .gatefold-panel--notes {
+    padding: var(--space-8) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-5);
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 98%) 0%,
+        rgb(244 248 247 / 95%) 100%
+      );
+  }
+
+  .notes-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .notes-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-amber-700);
+    background: rgb(255 240 230 / 90%);
+    padding: 3px 8px;
+    border-radius: var(--radius-xs);
+    border: 1px solid rgb(255 123 57 / 40%);
+  }
+
+  .badge-pip {
+    color: var(--color-amber-500);
+    font-size: 0.75rem;
+  }
+
+  .notes-frequencies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .notes-titles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .notes-title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    line-height: var(--leading-tight);
+    letter-spacing: -0.025em;
+  }
+
+  .notes-title a {
+    color: var(--color-blue-900);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-tactile);
+  }
+
+  .notes-title a:hover {
+    color: var(--color-blue-700);
+  }
+
+  .notes-artist {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .artist-by {
+    font-size: var(--text-xs);
+    opacity: 0.75;
+  }
+
+  .artist-highlight {
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  .notes-summary {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    line-height: var(--leading-body);
+    max-width: 52ch;
+  }
+
+  .notes-footer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding-top: var(--space-2);
+  }
+
+  .action-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .read-telemetry {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-ink-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .streaming-links {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    color: var(--color-ink-muted);
+  }
+
+  .stream-label {
+    font-weight: 700;
+  }
+
+  .stream-pill {
+    color: var(--color-blue-700);
+    text-decoration: none;
+    background: var(--color-aqua-100);
+    padding: 1px 6px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--color-border);
+    transition: all var(--motion-fast) var(--ease-tactile);
+  }
+
+  .stream-pill:hover {
+    background: var(--color-blue-900);
+    color: var(--color-sleeve);
+  }
+
+  @media (max-width: 860px) {
+    .gatefold-chassis {
+      grid-template-columns: 1fr;
+    }
+
+    .gatefold-panel--visual {
+      border-right: none;
+      border-bottom: 1px solid var(--color-border);
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .gatefold-panel--notes {
+      padding: var(--space-6) var(--space-4);
+    }
+  }
+</style>

@@ -1,0 +1,101 @@
+:root {
+  color-scheme: light;
+
+  /* Color Palette: Luminous Aqua & Amber Chrome */
+  --color-aqua-50: #EEFCFD;
+  --color-aqua-100: #DDF8FA;
+  --color-aqua-200: #B8F0F4;
+  --color-aqua-300: #8BE8F2;
+  --color-aqua-500: #38C8D9;
+  --color-blue-700: #167DB5;
+  --color-blue-900: #103B52;
+
+  --color-amber-400: #FFA86A;
+  --color-amber-500: #FF7B39;
+  --color-amber-700: #B83E14;
+
+  --color-mint-100: #DCF4EC;
+  --color-canvas: #F4F8F7;
+  --color-sleeve: #FFFFFF;
+  --color-sleeve-sub: #EDF5F5;
+  --color-ink: #1D2F3B;
+  --color-ink-muted: #526A7A;
+  --color-border: #D0E2E5;
+  --color-border-glow: rgb(56 200 217 / 45%);
+  --color-groove: rgb(16 59 82 / 8%);
+  --color-focus: #0F74E0;
+
+  /* Typography Stacks (Tri-System Harmony) */
+  --font-display: "Plus Jakarta Sans", "Source Sans 3", -apple-system, sans-serif;
+  --font-prose: "Source Sans 3", "Segoe UI", -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Consolas, monospace;
+
+  /* Type Scale */
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: clamp(1.75rem, 3.2vw, 2.75rem);
+  --text-3xl: clamp(2.5rem, 5.5vw, 4.5rem);
+
+  --leading-tight: 1.12;
+  --leading-heading: 1.22;
+  --leading-body: 1.76;
+
+  /* Spacing Scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Physical Media Die-Cut Radii */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
+  --radius-disc: 50%;
+
+  /* Tactile Physical Media Shadows & Insets */
+  --shadow-sleeve:
+    0 16px 36px -8px rgb(16 59 82 / 12%),
+    0 4px 12px rgb(16 59 82 / 6%),
+    inset 0 1px 0 rgb(255 255 255 / 90%);
+  --shadow-gatefold-hover:
+    0 24px 48px -12px rgb(16 59 82 / 18%),
+    0 6px 16px rgb(56 200 217 / 16%),
+    inset 0 1px 0 rgb(255 255 255 / 100%);
+  --shadow-disc:
+    0 12px 30px -4px rgb(16 59 82 / 22%),
+    0 2px 6px rgb(16 59 82 / 12%),
+    inset 0 0 0 1px rgb(255 255 255 / 40%);
+  --shadow-btn: 0 1px 2px rgb(16 59 82 / 8%);
+  --shadow-btn-hover: 0 2px 4px rgb(16 59 82 / 12%);
+  --shadow-pressed:
+    inset 0 1px 3px rgb(16 59 82 / 15%);
+
+  /* Layout Metrics */
+  --content-width: 76rem;
+  --dual-track-width: 72rem;
+  --reading-width: 42rem;
+  --obi-width: 5.5rem;
+  --page-gutter: clamp(1rem, 3.5vw, 2.5rem);
+
+  /* Transitions & Motion */
+  --motion-instant: 120ms;
+  --motion-fast: 240ms;
+  --motion-normal: 400ms;
+  --motion-slow: 800ms;
+  --ease-tactile: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.2, 0.7, 0.2, 1);
+}

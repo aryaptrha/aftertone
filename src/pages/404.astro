@@ -1,0 +1,101 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import TactileButton from '../components/ui/TactileButton.astro';
+import ArchivalStamp from '../components/ui/ArchivalStamp.astro';
+import Soundplate from '../components/song/Soundplate.astro';
+import { defaultLang } from '../i18n/ui';
+---
+
+<BaseLayout title="404 — Resonansi Tidak Ditemukan" lang={defaultLang}>
+  <div class="not-found-page">
+    <div class="container not-found-container">
+      <div class="not-found-chassis">
+        <div class="not-found-soundplate">
+          <Soundplate
+            title="UNRECORDED"
+            artist="Unknown Frequency"
+            catalogCode="ERR-404"
+            size="md"
+            interactive={true}
+          />
+        </div>
+
+        <div class="not-found-info">
+          <ArchivalStamp code="STATUS 404" label="GROOVE UNLOCATED" color="amber" />
+          <h1 class="error-title">Resonansi Tidak Ditemukan</h1>
+          <p class="error-text">
+            Jalur atau nada yang Anda cari tampaknya telah memudar, berpindah rak, atau belum terukir di arsip piringan hitam aftertone.
+          </p>
+
+          <div class="error-actions">
+            <TactileButton href="/id/" variant="primary">
+              <span>Kembali ke Arsip (ID)</span>
+            </TactileButton>
+            <TactileButton href="/en/" variant="secondary">
+              <span>Return to Archive (EN)</span>
+            </TactileButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .not-found-page {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--space-16);
+  }
+
+  .not-found-container {
+    display: flex;
+    justify-content: center;
+  }
+
+  .not-found-chassis {
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-10) var(--space-8);
+    box-shadow: var(--shadow-gatefold-hover);
+    text-align: center;
+    max-width: 36rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+  }
+
+  .not-found-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .error-title {
+    font-family: var(--font-display);
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    color: var(--color-blue-900);
+    letter-spacing: -0.02em;
+  }
+
+  .error-text {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    line-height: var(--leading-body);
+    max-width: 44ch;
+  }
+
+  .error-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+</style>

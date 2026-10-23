@@ -1,0 +1,392 @@
+---
+interface Props {
+  title?: string;
+  artist?: string;
+  catalogCode?: string;
+  size?: 'sm' | 'md' | 'lg';
+  interactive?: boolean;
+  class?: string;
+}
+
+const {
+  title = 'aftertone',
+  artist = 'Archival Master',
+  catalogCode = 'AT-001',
+  size = 'md',
+  interactive = true,
+  class: className = '',
+} = Astro.props;
+---
+
+<div
+  class:list={['soundplate-rig', `soundplate-rig--${size}`, { 'is-interactive': interactive }, className]}
+  data-soundplate
+  aria-hidden="true"
+>
+  <!-- Turntable Platter Base -->
+  <div class="turntable-chassis">
+    <!-- Concentric Grooved Vinyl Platter -->
+    <div class="vinyl-disc" data-disc>
+      <div class="groove-sheen"></div>
+      <div class="groove-highlight"></div>
+
+      <!-- Center Record Label -->
+      <div class="center-label">
+        <div class="label-rim"></div>
+        <div class="label-content">
+          <span class="label-brand">aftertone</span>
+          <span class="label-speed">33⅓ RPM // STEREO</span>
+          <span class="label-code">{catalogCode}</span>
+          <span class="label-title">{title}</span>
+          <span class="label-artist">{artist}</span>
+        </div>
+        <div class="spindle-hole"></div>
+      </div>
+    </div>
+
+    <!-- Tone-Arm Turntable Assembly -->
+    <div class="tonearm-assembly" data-tonearm>
+      <div class="tonearm-pivot"></div>
+      <div class="tonearm-rod"></div>
+      <div class="tonearm-cartridge">
+        <span class="needle-glow"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import gsap from 'gsap';
+
+  function initSoundplates() {
+    const soundplates = document.querySelectorAll<HTMLElement>('[data-soundplate]');
+
+    soundplates.forEach((rig) => {
+      const disc = rig.querySelector<HTMLElement>('[data-disc]');
+      const tonearm = rig.querySelector<HTMLElement>('[data-tonearm]');
+
+      if (!disc) return;
+
+      // Check prefers-reduced-motion
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (prefersReduced) return;
+
+      // Ambient 33 1/3 RPM continuous revolution
+      const rotationTween = gsap.to(disc, {
+        rotation: 360,
+        duration: 36,
+        repeat: -1,
+        ease: 'none',
+        paused: false,
+      });
+
+      if (rig.classList.contains('is-interactive')) {
+        rig.addEventListener('mouseenter', () => {
+          // Accelerate to playback speed
+          gsap.to(rotationTween, {
+            timeScale: 3,
+            duration: 1.2,
+            ease: 'power2.out',
+          });
+
+          // Pivot tone-arm into track groove
+          if (tonearm) {
+            gsap.to(tonearm, {
+              rotate: 14,
+              duration: 0.8,
+              ease: 'power2.out',
+            });
+          }
+        });
+
+        rig.addEventListener('mouseleave', () => {
+          // Decelerate back to ambient speed
+          gsap.to(rotationTween, {
+            timeScale: 1,
+            duration: 1.8,
+            ease: 'power2.out',
+          });
+
+          // Rest tone-arm
+          if (tonearm) {
+            gsap.to(tonearm, {
+              rotate: 0,
+              duration: 1.2,
+              ease: 'power2.out',
+            });
+          }
+        });
+      }
+    });
+  }
+
+  // Run on page mount and Astro page navigation
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSoundplates);
+  } else {
+    initSoundplates();
+  }
+  document.addEventListener('astro:page-load', initSoundplates);
+</script>
+
+<style>
+  .soundplate-rig {
+    position: relative;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Size variants */
+  .soundplate-rig--sm {
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+
+  .soundplate-rig--md {
+    width: 14rem;
+    height: 14rem;
+  }
+
+  .soundplate-rig--lg {
+    width: 22rem;
+    height: 22rem;
+  }
+
+  .turntable-chassis {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Vinyl Record Disc */
+  .vinyl-disc {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-disc);
+    background:
+      /* Lathe micro-grooves */
+      repeating-radial-gradient(
+        circle at center,
+        #121d24 0px,
+        #121d24 1px,
+        #1b2c36 1px,
+        #1b2c36 3px,
+        #0d151a 3px,
+        #0d151a 4px
+      );
+    box-shadow:
+      var(--shadow-disc),
+      0 0 0 2px rgb(56 200 217 / 20%);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  /* Specular Light Refraction Across Grooves */
+  .groove-sheen {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-disc);
+    background:
+      conic-gradient(
+        from 30deg at 50% 50%,
+        rgb(255 255 255 / 15%) 0deg,
+        transparent 45deg,
+        rgb(139 232 242 / 20%) 90deg,
+        transparent 135deg,
+        rgb(255 168 106 / 15%) 180deg,
+        transparent 225deg,
+        rgb(255 255 255 / 15%) 270deg,
+        transparent 315deg,
+        rgb(255 255 255 / 15%) 360deg
+      );
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+
+  .groove-highlight {
+    position: absolute;
+    inset: 6px;
+    border-radius: var(--radius-disc);
+    border: 1px dashed rgb(255 255 255 / 12%);
+    pointer-events: none;
+  }
+
+  /* Center Album Record Label */
+  .center-label {
+    position: relative;
+    width: 38%;
+    height: 38%;
+    border-radius: var(--radius-disc);
+    background:
+      linear-gradient(135deg,
+        var(--color-aqua-100) 0%,
+        var(--color-sleeve) 40%,
+        var(--color-aqua-200) 100%
+      );
+    border: 2px solid rgb(255 255 255 / 90%);
+    box-shadow:
+      0 4px 12px rgb(16 59 82 / 25%),
+      inset 0 1px 2px rgb(255 255 255 / 95%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .label-rim {
+    position: absolute;
+    inset: 3px;
+    border-radius: var(--radius-disc);
+    border: 1px solid rgb(56 200 217 / 40%);
+  }
+
+  .label-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4px;
+    z-index: 1;
+    max-width: 90%;
+  }
+
+  .label-brand {
+    font-family: var(--font-display);
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: var(--color-blue-900);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .label-speed {
+    font-family: var(--font-mono);
+    font-size: 0.42rem;
+    font-weight: 700;
+    color: var(--color-amber-700);
+    letter-spacing: 0.05em;
+    margin-top: 1px;
+  }
+
+  .label-code {
+    font-family: var(--font-mono);
+    font-size: 0.42rem;
+    color: var(--color-ink-muted);
+  }
+
+  .label-title {
+    font-family: var(--font-display);
+    font-size: 0.52rem;
+    font-weight: 700;
+    color: var(--color-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 6ch;
+    margin-top: 1px;
+  }
+
+  .label-artist {
+    display: none;
+  }
+
+  .spindle-hole {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #0d151a;
+    border: 1.5px solid rgb(255 168 106 / 70%);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+    z-index: 3;
+  }
+
+  /* Tone-Arm Assembly */
+  .tonearm-assembly {
+    position: absolute;
+    top: -8%;
+    right: -4%;
+    width: 35%;
+    height: 60%;
+    transform-origin: 85% 15%;
+    pointer-events: none;
+    z-index: 4;
+    transition: transform 0.4s var(--ease-tactile);
+  }
+
+  .tonearm-pivot {
+    position: absolute;
+    top: 5%;
+    right: 10%;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 35% 35%, #ffffff, #738b99);
+    border: 1px solid var(--color-blue-900);
+    box-shadow: 0 3px 6px rgb(16 59 82 / 20%);
+  }
+
+  .tonearm-rod {
+    position: absolute;
+    top: 12%;
+    right: 14%;
+    width: 3px;
+    height: 75%;
+    background:
+      linear-gradient(90deg, #e4edf0 0%, #a4b7c2 50%, #768a96 100%);
+    transform: rotate(24deg);
+    transform-origin: top center;
+    border-radius: 1px;
+    box-shadow: 2px 2px 5px rgb(16 59 82 / 20%);
+  }
+
+  .tonearm-cartridge {
+    position: absolute;
+    bottom: 0;
+    left: 8%;
+    width: 9px;
+    height: 15px;
+    background: var(--color-amber-500);
+    border-radius: 2px;
+    box-shadow: 0 2px 6px rgb(255 123 57 / 50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .needle-glow {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 6px #ffffff;
+  }
+
+  /* Compact Scale */
+  .soundplate-rig--sm .tonearm-assembly {
+    display: none;
+  }
+
+  .soundplate-rig--sm .label-speed,
+  .soundplate-rig--sm .label-title,
+  .soundplate-rig--sm .label-code {
+    display: none;
+  }
+
+  .soundplate-rig--lg .label-artist {
+    display: block;
+    font-size: 0.5rem;
+    color: var(--color-ink-muted);
+  }
+</style>

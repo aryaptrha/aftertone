@@ -1,0 +1,11 @@
+artist: "JKT48"
+genre: idol-pop
+themes:
+  - hope
+  - self-discovery
+  - identity
+  - belonging
+# Set to "published" and add publishedAt (YYYY-MM-DD) when both articles are written.
+status: draft
+featured: false
+relatedSongs: []

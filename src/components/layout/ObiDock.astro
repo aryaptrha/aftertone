@@ -1,0 +1,504 @@
+---
+import { Image } from 'astro:assets';
+import logoImg from '../../assets/logo.png';
+import type { SupportedLanguage } from '../../i18n/ui';
+import { useTranslations } from '../../i18n/utils';
+
+interface Props {
+  lang: SupportedLanguage;
+  counterpartUrl?: string;
+}
+
+const { lang, counterpartUrl } = Astro.props;
+const t = useTranslations(lang);
+const currentPath = Astro.url.pathname;
+
+const navItems = [
+  { code: '01', href: `/${lang}/`, label: lang === 'id' ? 'ARSIP' : 'ARCHIVE' },
+  { code: '02', href: `/${lang}/explore/`, label: lang === 'id' ? 'JELAJAH' : 'VAULT' },
+];
+
+function isActive(href: string) {
+  if (href === `/${lang}/`) {
+    return currentPath === `/${lang}/` || currentPath === `/${lang}`;
+  }
+  return currentPath.startsWith(href);
+}
+
+// Compute language switch target URL
+function getLangUrl(targetLang: SupportedLanguage) {
+  if (targetLang === lang) return currentPath;
+  if (counterpartUrl) return counterpartUrl;
+
+  const currentSegment = `/${lang}`;
+  if (currentPath.startsWith(currentSegment)) {
+    return currentPath.replace(currentSegment, `/${targetLang}`);
+  }
+  return `/${targetLang}/`;
+}
+---
+
+<aside class="obi-spine" aria-label="Archival Obi Spine Navigation">
+  <!-- Desktop Vertical Obi Spine -->
+  <div class="obi-spine__inner">
+    <!-- Top Hardware Rivet & Logo -->
+    <div class="obi-header">
+      <div class="hardware-rivet" aria-hidden="true"></div>
+      <a href={`/${lang}/`} class="obi-brand" title="aftertone - Archive">
+        <Image
+          src={logoImg}
+          alt="aftertone stamp"
+          class="obi-logo"
+          width={36}
+          height={36}
+          loading="eager"
+        />
+      </a>
+      <span class="obi-cat" aria-hidden="true">AT-026</span>
+    </div>
+
+    <!-- Vertical Japanese Typography Ribbon -->
+    <div class="obi-ribbon" aria-hidden="true">
+      <span class="obi-kanji">アフタートーン</span>
+      <span class="obi-edition">SPECIAL DELUXE ARCHIVE // 2026</span>
+    </div>
+
+    <!-- Navigation Deck -->
+    <nav class="obi-nav" aria-label="Main Navigation">
+      <ul class="obi-nav__list">
+        {
+          navItems.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <li class="obi-nav__item">
+                <a
+                  href={item.href}
+                  class:list={['obi-nav__link', { 'obi-nav__link--active': active }]}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  <span class="nav-code">{item.code}</span>
+                  <span class="nav-label">{item.label}</span>
+                  {active && <span class="nav-pip" aria-hidden="true" />}
+                </a>
+              </li>
+            );
+          })
+        }
+      </ul>
+    </nav>
+
+    <!-- Bottom Language Switcher & Mechanical Dial -->
+    <div class="obi-footer">
+      <div class="lang-switch-matrix" role="group" aria-label="Language Edition">
+        <a
+          href={getLangUrl('id')}
+          class:list={['lang-pill', { 'lang-pill--active': lang === 'id' }]}
+          aria-label="Bahasa Indonesia"
+          title="Bahasa Indonesia"
+        >
+          ID
+        </a>
+        <span class="lang-sep" aria-hidden="true">/</span>
+        <a
+          href={getLangUrl('en')}
+          class:list={['lang-pill', { 'lang-pill--active': lang === 'en' }]}
+          aria-label="English Edition"
+          title="English Edition"
+        >
+          EN
+        </a>
+      </div>
+      <div class="hardware-rivet" aria-hidden="true"></div>
+    </div>
+  </div>
+</aside>
+
+<!-- Mobile Floating Tactile Sound Console -->
+<nav class="mobile-sound-console" aria-label="Mobile Navigation">
+  <div class="mobile-console__inner">
+    <a href={`/${lang}/`} class="mobile-brand" aria-label="aftertone Home">
+      <Image src={logoImg} alt="" width={24} height={24} loading="eager" />
+      <span class="mobile-brand-title">aftertone</span>
+    </a>
+
+    <div class="mobile-nav-group">
+      {
+        navItems.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <a
+              href={item.href}
+              class:list={['mobile-tab', { 'mobile-tab--active': active }]}
+              aria-current={active ? 'page' : undefined}
+            >
+              <span class="mobile-tab__code">{item.code}</span>
+              <span class="mobile-tab__label">{item.label}</span>
+            </a>
+          );
+        })
+      }
+    </div>
+
+    <!-- Mobile Language Toggle -->
+    <a
+      href={getLangUrl(lang === 'id' ? 'en' : 'id')}
+      class="mobile-lang-btn"
+      aria-label={`Switch to ${lang === 'id' ? 'English' : 'Indonesian'}`}
+    >
+      <span class="lang-cur">{lang.toUpperCase()}</span>
+      <span class="lang-alt">{lang === 'id' ? 'EN' : 'ID'}</span>
+    </a>
+  </div>
+</nav>
+
+<style>
+  /* Desktop Vertical Obi-Spine */
+  .obi-spine {
+    display: none;
+  }
+
+  @media (min-width: 860px) {
+    .obi-spine {
+      display: block;
+      width: var(--obi-width);
+      min-width: var(--obi-width);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      z-index: 90;
+      background:
+        linear-gradient(180deg,
+          rgb(255 255 255 / 96%) 0%,
+          rgb(238 252 253 / 90%) 50%,
+          rgb(244 248 247 / 95%) 100%
+        );
+      border-right: 1px solid var(--color-border);
+      box-shadow: 4px 0 24px rgb(16 59 82 / 6%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      flex-shrink: 0;
+    }
+
+    .obi-spine__inner {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding-block: var(--space-5);
+      position: relative;
+    }
+
+    .hardware-rivet {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 35% 35%, rgb(255 255 255 / 90%), rgb(16 59 82 / 40%));
+      box-shadow:
+        inset 0 1px 1px rgb(255 255 255 / 80%),
+        0 1px 2px rgb(16 59 82 / 20%);
+      border: 1px solid rgb(16 59 82 / 30%);
+    }
+
+    .obi-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-2);
+    }
+
+    .obi-brand {
+      display: block;
+      padding: 3px;
+      border-radius: var(--radius-sm);
+      transition: transform var(--motion-fast) var(--ease-tactile);
+    }
+
+    .obi-brand:hover {
+      transform: scale(1.08) rotate(-4deg);
+    }
+
+    .obi-logo {
+      width: 2rem;
+      height: 2rem;
+      object-fit: contain;
+      filter: drop-shadow(0 2px 5px rgb(16 59 82 / 12%));
+    }
+
+    .obi-cat {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--color-ink-muted);
+      background: rgb(221 248 250 / 80%);
+      padding: 1px 5px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--color-border);
+    }
+
+    /* Vertical Japanese Ribbon */
+    .obi-ribbon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-4);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      user-select: none;
+      opacity: 0.85;
+      padding-block: var(--space-2);
+    }
+
+    .obi-kanji {
+      font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+      font-size: var(--text-sm);
+      font-weight: 800;
+      letter-spacing: 0.25em;
+      color: var(--color-blue-900);
+      text-shadow: 0 1px 0 rgb(255 255 255 / 80%);
+    }
+
+    .obi-edition {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--color-amber-700);
+    }
+
+    /* Navigation */
+    .obi-nav {
+      width: 100%;
+      padding-inline: var(--space-2);
+    }
+
+    .obi-nav__list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      width: 100%;
+    }
+
+    .obi-nav__item {
+      width: 100%;
+    }
+
+    .obi-nav__link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: var(--space-2) var(--space-1);
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      position: relative;
+      transition:
+        background var(--motion-fast) var(--ease-tactile),
+        border-color var(--motion-fast) var(--ease-tactile),
+        transform var(--motion-fast) var(--ease-tactile);
+    }
+
+    .nav-code {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--color-amber-500);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-label {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: var(--color-ink);
+      text-transform: uppercase;
+    }
+
+    .nav-pip {
+      width: 5px;
+      height: 5px;
+      background: var(--color-amber-500);
+      border-radius: 1px;
+      box-shadow: 0 0 6px rgb(255 123 57 / 80%);
+      margin-top: 2px;
+    }
+
+    .obi-nav__link:hover {
+      background: rgb(221 248 250 / 60%);
+      border-color: var(--color-border);
+      transform: translateY(-1px);
+    }
+
+    .obi-nav__link--active {
+      background:
+        linear-gradient(135deg, rgb(255 255 255 / 95%), rgb(184 240 244 / 70%));
+      border-color: var(--color-aqua-500);
+      box-shadow: var(--shadow-foil);
+    }
+
+    .obi-nav__link--active .nav-label {
+      color: var(--color-blue-900);
+    }
+
+    /* Footer & Language */
+    .obi-footer {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .lang-switch-matrix {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      background: var(--color-sleeve);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-xs);
+      padding: 2px 4px;
+      box-shadow: 0 2px 5px rgb(16 59 82 / 5%);
+    }
+
+    .lang-pill {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--color-ink-muted);
+      text-decoration: none;
+      padding: 1px 4px;
+      border-radius: 2px;
+      transition: color var(--motion-fast) var(--ease-tactile);
+    }
+
+    .lang-pill:hover {
+      color: var(--color-blue-900);
+    }
+
+    .lang-pill--active {
+      color: var(--color-blue-900);
+      background: var(--color-aqua-200);
+      font-weight: 800;
+    }
+
+    .lang-sep {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      color: var(--color-border);
+    }
+  }
+
+  /* Mobile Floating Sound Console */
+  .mobile-sound-console {
+    display: block;
+    position: fixed;
+    bottom: var(--space-3);
+    left: var(--space-3);
+    right: var(--space-3);
+    z-index: 100;
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 95%) 0%,
+        rgb(238 252 253 / 90%) 100%
+      );
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sleeve);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    padding: var(--space-2) var(--space-3);
+  }
+
+  @media (min-width: 860px) {
+    .mobile-sound-console {
+      display: none;
+    }
+  }
+
+  .mobile-console__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--color-blue-900);
+  }
+
+  .mobile-brand-title {
+    font-family: var(--font-display);
+    font-size: var(--text-sm);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .mobile-nav-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+  }
+
+  .mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    transition: background var(--motion-fast) var(--ease-tactile);
+  }
+
+  .mobile-tab__code {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: var(--color-amber-500);
+  }
+
+  .mobile-tab__label {
+    font-family: var(--font-display);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-ink);
+  }
+
+  .mobile-tab--active {
+    background: var(--color-aqua-100);
+    border: 1px solid var(--color-aqua-300);
+  }
+
+  .mobile-tab--active .mobile-tab__label {
+    color: var(--color-blue-900);
+  }
+
+  .mobile-lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    background: var(--color-canvas);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xs);
+    padding: 3px 6px;
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+  }
+
+  .mobile-lang-btn .lang-cur {
+    color: var(--color-blue-900);
+  }
+
+  .mobile-lang-btn .lang-alt {
+    color: var(--color-amber-500);
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+import { render } from 'astro:content';
+import DualTrackLayout from '../../../layouts/DualTrackLayout.astro';
+import {
+  getPublishedArticles,
+  getArticleCounterpart,
+  getRelatedArticles,
+  type Article,
+} from '../../../data/articles';
+
+export async function getStaticPaths() {
+  const allArticles = await getPublishedArticles();
+
+  return Promise.all(
+    allArticles.map(async (article) => {
+      const counterpart = await getArticleCounterpart(article);
+      const counterpartUrl = counterpart
+        ? `/${counterpart.data.language}/songs/${counterpart.data.slug}/`
+        : undefined;
+
+      const relatedArticles = await getRelatedArticles(article);
+
+      return {
+        params: {
+          lang: article.data.language,
+          slug: article.data.slug,
+        },
+        props: {
+          article,
+          counterpartUrl,
+          relatedArticles,
+        },
+      };
+    })
+  );
+}
+
+interface Props {
+  article: Article;
+  counterpartUrl?: string;
+  relatedArticles: Article[];
+}
+
+const { article, counterpartUrl, relatedArticles } = Astro.props;
+const { Content } = await render(article.entry);
+---
+
+<DualTrackLayout song={article} counterpartUrl={counterpartUrl} relatedSongs={relatedArticles}>
+  <Content />
+</DualTrackLayout>

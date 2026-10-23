@@ -1,0 +1,322 @@
+---
+import GlossButton from '../ui/GlossButton.astro';
+import ThemeTag from '../ui/ThemeTag.astro';
+import { useTranslations } from '../../i18n/utils';
+import type { SupportedLanguage } from '../../i18n/ui';
+import type { Article } from '../../data/articles';
+
+interface Props {
+  song: Article;
+  lang: SupportedLanguage;
+  class?: string;
+}
+
+const { song, lang, class: className = '' } = Astro.props;
+const t = useTranslations(lang);
+const songHref = `/${lang}/songs/${song.data.slug}/`;
+---
+
+<article class:list={['featured-card', className]}>
+  <div class="featured-card__surface">
+    <div class="featured-card__content">
+      <div class="featured-card__header">
+        <div class="featured-badge">
+          <span class="badge-spark" aria-hidden="true">★</span>
+          <span>{t('featured.badge')}</span>
+        </div>
+        <div class="featured-tags">
+          {song.data.themes.slice(0, 2).map((theme) => (
+            <ThemeTag label={theme} href={`/${lang}/explore/?theme=${encodeURIComponent(theme)}`} />
+          ))}
+        </div>
+      </div>
+
+      <div class="featured-card__titles">
+        <h3 class="featured-title">
+          <a href={songHref}>{song.data.title}</a>
+        </h3>
+        <p class="featured-artist">
+          {t('song.by')} <span class="artist-name">{song.data.artist}</span>
+          {song.data.genre && <span class="genre-tag">• {song.data.genre}</span>}
+        </p>
+      </div>
+
+      <p class="featured-summary">{song.data.summary}</p>
+
+      <div class="featured-card__footer">
+        <GlossButton href={songHref} variant="primary">
+          <span>{t('song.read')}</span>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M3.333 8h9.334M8 3.333L12.667 8 8 12.667"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </GlossButton>
+
+        {song.data.readTimeMinutes && (
+          <span class="read-time">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" />
+              <path d="M8 4.5V8L10.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+            {song.data.readTimeMinutes} {t('song.readTime')}
+          </span>
+        )}
+      </div>
+    </div>
+
+    <!-- Editorial Gloss Artwork Frame -->
+    <div class="featured-card__visual" aria-hidden="true">
+      <div class="visual-canvas">
+        <div class="visual-orb visual-orb--1"></div>
+        <div class="visual-orb visual-orb--2"></div>
+        <div class="visual-grid"></div>
+        <div class="visual-plate">
+          <div class="plate-ring"></div>
+          <div class="plate-center">
+            <span class="plate-text">aftertone</span>
+            <span class="plate-sub">ESSAY #{song.data.slug.slice(0, 4).toUpperCase()}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+  .featured-card {
+    position: relative;
+    border-radius: var(--radius-xl);
+    padding: 2px;
+    background:
+      linear-gradient(
+        135deg,
+        rgb(255 255 255 / 90%) 0%,
+        rgb(139 232 242 / 40%) 50%,
+        rgb(255 120 62 / 30%) 100%
+      );
+    box-shadow: var(--shadow-raised);
+    overflow: hidden;
+  }
+
+  .featured-card__surface {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    background: var(--color-white);
+    border-radius: calc(var(--radius-xl) - 2px);
+    overflow: hidden;
+  }
+
+  .featured-card__content {
+    padding: var(--space-8) var(--space-8);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-4);
+    z-index: 2;
+  }
+
+  .featured-card__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .featured-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 50%) 0%, transparent 100%),
+      var(--color-orange-500);
+    color: var(--color-white);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--radius-xs);
+    box-shadow: var(--shadow-orange);
+    letter-spacing: 0.02em;
+  }
+
+  .badge-spark {
+    font-size: 0.75rem;
+  }
+
+  .featured-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .featured-title {
+    font-size: var(--text-2xl);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+
+  .featured-title a {
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-standard);
+  }
+
+  .featured-title a:hover {
+    color: var(--color-blue-700);
+  }
+
+  .featured-artist {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    margin-top: var(--space-1);
+  }
+
+  .artist-name {
+    font-weight: 700;
+    color: var(--color-blue-900);
+  }
+
+  .genre-tag {
+    opacity: 0.8;
+  }
+
+  .featured-summary {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    line-height: var(--leading-body);
+    max-width: 50ch;
+  }
+
+  .featured-card__footer {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-2);
+  }
+
+  .read-time {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-ink-muted);
+  }
+
+  /* Decorative Visual Panel (Retro-futuristic Album Plate) */
+  .featured-card__visual {
+    background:
+      radial-gradient(circle at 75% 25%, rgb(139 232 242 / 45%), transparent 60%),
+      radial-gradient(circle at 25% 75%, rgb(255 148 95 / 20%), transparent 60%),
+      var(--color-cloud);
+    border-left: 1px solid var(--color-line);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 20rem;
+    overflow: hidden;
+  }
+
+  .visual-canvas {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .visual-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(24px);
+    pointer-events: none;
+  }
+
+  .visual-orb--1 {
+    width: 12rem;
+    height: 12rem;
+    background: var(--color-aqua-300);
+    top: 15%;
+    right: 15%;
+    opacity: 0.7;
+  }
+
+  .visual-orb--2 {
+    width: 9rem;
+    height: 9rem;
+    background: var(--color-orange-400);
+    bottom: 20%;
+    left: 20%;
+    opacity: 0.4;
+  }
+
+  .visual-plate {
+    position: relative;
+    width: 13.5rem;
+    height: 11.5rem;
+    border-radius: var(--radius-md);
+    background:
+      linear-gradient(135deg, rgb(255 255 255 / 95%) 0%, rgb(221 248 250 / 80%) 100%);
+    border: 2px solid rgb(255 255 255 / 95%);
+    box-shadow:
+      0 12px 32px rgb(16 55 71 / 15%),
+      inset 0 2px 6px rgb(255 255 255 / 90%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+  }
+
+  .plate-ring {
+    position: absolute;
+    inset: 10px;
+    border-radius: var(--radius-sm);
+    border: 1px dashed rgb(56 200 217 / 50%);
+  }
+
+  .plate-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .plate-text {
+    font-size: var(--text-base);
+    font-weight: 800;
+    color: var(--color-blue-900);
+    letter-spacing: -0.02em;
+  }
+
+  .plate-sub {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-orange-700);
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+
+  @media (max-width: 860px) {
+    .featured-card__surface {
+      grid-template-columns: 1fr;
+    }
+
+    .featured-card__visual {
+      min-height: 12rem;
+      border-left: none;
+      border-top: 1px solid var(--color-line);
+    }
+
+    .visual-plate {
+      width: 9rem;
+      height: 9rem;
+    }
+  }
+</style>

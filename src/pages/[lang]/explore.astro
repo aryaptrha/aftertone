@@ -1,0 +1,440 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SearchInput from '../../components/ui/SearchInput.astro';
+import SleeveCard from '../../components/song/SleeveCard.astro';
+import ArchivalStamp from '../../components/ui/ArchivalStamp.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import { useTranslations } from '../../i18n/utils';
+import { languages, type SupportedLanguage } from '../../i18n/ui';
+import { getPublishedArticles, getAvailableThemes } from '../../data/articles';
+
+export function getStaticPaths() {
+  return Object.keys(languages).map((lang) => ({
+    params: { lang },
+  }));
+}
+
+const { lang } = Astro.params as { lang: SupportedLanguage };
+const t = useTranslations(lang);
+
+const sortedArticles = await getPublishedArticles(lang);
+const availableThemes = await getAvailableThemes(lang);
+---
+
+<BaseLayout
+  title={t('explore.title')}
+  description={t('explore.subtitle')}
+  lang={lang}
+  counterpartUrl={lang === 'id' ? '/en/explore/' : '/id/explore/'}
+>
+  <div class="vault-page">
+    <div class="container">
+      <!-- Vault Header -->
+      <header class="vault-header">
+        <div class="vault-eyebrow">
+          <ArchivalStamp code="RECORD VAULT" label="CATALOG MATRIX" color="amber" />
+          <span class="vault-spec">HIGH-DENSITY ARCHIVAL STORAGE</span>
+        </div>
+
+        <h1 class="vault-title">{t('explore.title')}</h1>
+        <p class="vault-subtitle">{t('explore.subtitle')}</p>
+      </header>
+
+      <!-- Archival Control Console -->
+      <section class="vault-console" aria-label="Vault scanner controls">
+        <!-- Search Input Bar -->
+        <div class="scanner-row">
+          <SearchInput
+            id="explore-search"
+            placeholder={lang === 'id' ? 'Cari judul lagu, artis, atau kata kunci...' : 'Search title, artist, or thematic keyword...'}
+            label={t('explore.searchPlaceholder')}
+          />
+        </div>
+
+        <!-- Frequency EQ Toggles -->
+        <div class="frequency-row">
+          <span class="frequency-title">RESONANCE EQ:</span>
+          <div class="frequency-tabs" role="toolbar" aria-label="Acoustic frequency filters">
+            <button
+              type="button"
+              class="eq-toggle eq-toggle--active"
+              data-theme="all"
+              aria-pressed="true"
+            >
+              <span class="eq-pip" aria-hidden="true"></span>
+              <span>{t('explore.filterAll')}</span>
+            </button>
+
+            {
+              availableThemes.map((theme) => (
+                <button
+                  type="button"
+                  class="eq-toggle"
+                  data-theme={theme.id.toLowerCase()}
+                  aria-pressed="false"
+                >
+                  <span class="eq-pip" aria-hidden="true"></span>
+                  <span>{theme.label} ({theme.count})</span>
+                </button>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Vault Telemetry Bar -->
+        <div class="vault-telemetry-bar">
+          <div id="results-count" class="telemetry-readout" aria-live="polite">
+            <span class="readout-label">CATALOG COUNT:</span>
+            <span class="readout-num" id="count-number">{sortedArticles.length}</span>
+            <span class="readout-unit">SLEEVES AVAILABLE</span>
+          </div>
+
+          <button id="clear-filters-btn" type="button" class="reset-lever" style="display: none;">
+            <span class="lever-icon" aria-hidden="true">↺</span>
+            <span>{t('explore.clearFilters')}</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Vault Vinyl Crate Rack -->
+      <section class="vault-rack-section" aria-label="Vinyl archive catalog">
+        <div id="vault-grid" class="vault-sleeve-grid">
+          {sortedArticles.map((song) => (
+            <SleeveCard song={song} lang={lang} />
+          ))}
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="empty-state-wrap" style="display: none; margin-top: var(--space-10);">
+          <EmptyState
+            title={t('explore.noResultsTitle')}
+            text={t('explore.noResultsText')}
+            actionText={t('explore.clearFilters')}
+            actionId="empty-reset-btn"
+          />
+        </div>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('explore-search');
+    const filterButtons = document.querySelectorAll('.eq-toggle');
+    const cards = document.querySelectorAll('#vault-grid .sleeve-card');
+    const countNumber = document.getElementById('count-number');
+    const clearBtn = document.getElementById('clear-filters-btn');
+    const emptyStateWrap = document.getElementById('empty-state-wrap');
+    const emptyResetBtn = document.getElementById('empty-reset-btn');
+
+    let activeTheme = 'all';
+    let searchQuery = '';
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTheme = urlParams.get('theme');
+    const initialQuery = urlParams.get('q');
+
+    if (initialTheme) {
+      activeTheme = initialTheme.toLowerCase();
+      filterButtons.forEach((btn) => {
+        const btnTheme = btn.getAttribute('data-theme');
+        const isActive = btnTheme === activeTheme;
+        btn.classList.toggle('eq-toggle--active', isActive);
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+
+    if (initialQuery && searchInput) {
+      searchQuery = initialQuery.toLowerCase().trim();
+      searchInput.value = initialQuery;
+    }
+
+    function applyFilters() {
+      let visibleCount = 0;
+
+      cards.forEach((card) => {
+        const title = card.getAttribute('data-title') || '';
+        const songTitle = card.getAttribute('data-song-title') || '';
+        const artist = card.getAttribute('data-artist') || '';
+        const rawThemes = card.getAttribute('data-themes') || '';
+        const themeList = rawThemes.split(',').map((t) => t.trim().toLowerCase());
+
+        const matchesSearch =
+          searchQuery === '' ||
+          title.includes(searchQuery) ||
+          songTitle.includes(searchQuery) ||
+          artist.includes(searchQuery);
+
+        const matchesTheme =
+          activeTheme === 'all' || themeList.includes(activeTheme);
+
+        if (matchesSearch && matchesTheme) {
+          card.style.display = '';
+          visibleCount++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      if (countNumber) {
+        countNumber.textContent = visibleCount.toString();
+      }
+
+      const hasActiveFilters = activeTheme !== 'all' || searchQuery !== '';
+      if (clearBtn) {
+        clearBtn.style.display = hasActiveFilters ? 'inline-flex' : 'none';
+      }
+
+      if (emptyStateWrap) {
+        emptyStateWrap.style.display = visibleCount === 0 ? 'block' : 'none';
+      }
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value.toLowerCase().trim();
+        applyFilters();
+      });
+    }
+
+    filterButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-theme') || 'all';
+        activeTheme = theme;
+
+        filterButtons.forEach((b) => {
+          const isActive = b === btn;
+          b.classList.toggle('eq-toggle--active', isActive);
+          b.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+
+        applyFilters();
+      });
+    });
+
+    function resetFilters() {
+      activeTheme = 'all';
+      searchQuery = '';
+      if (searchInput) searchInput.value = '';
+
+      filterButtons.forEach((btn) => {
+        const isAll = btn.getAttribute('data-theme') === 'all';
+        btn.classList.toggle('eq-toggle--active', isAll);
+        btn.setAttribute('aria-pressed', isAll ? 'true' : 'false');
+      });
+
+      if (window.history.replaceState) {
+        const url = new URL(window.location.href);
+        url.search = '';
+        window.history.replaceState({}, '', url.toString());
+      }
+
+      applyFilters();
+    }
+
+    if (clearBtn) clearBtn.addEventListener('click', resetFilters);
+    if (emptyResetBtn) emptyResetBtn.addEventListener('click', resetFilters);
+
+    applyFilters();
+  });
+</script>
+
+<style>
+  .vault-page {
+    padding-top: var(--space-12);
+    padding-bottom: var(--space-24);
+  }
+
+  .vault-header {
+    margin-bottom: var(--space-8);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .vault-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .vault-spec {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .vault-title {
+    font-family: var(--font-display);
+    font-size: var(--text-3xl);
+    font-weight: 800;
+    line-height: var(--leading-tight);
+    color: var(--color-blue-900);
+    letter-spacing: -0.03em;
+  }
+
+  .vault-subtitle {
+    font-size: var(--text-base);
+    color: var(--color-ink-muted);
+    max-width: 52ch;
+    line-height: 1.6;
+  }
+
+  /* Vault Control Deck */
+  .vault-console {
+    background:
+      linear-gradient(180deg,
+        rgb(255 255 255 / 96%) 0%,
+        rgb(238 252 253 / 88%) 100%
+      );
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-6) var(--space-8);
+    box-shadow: var(--shadow-sleeve);
+    margin-bottom: var(--space-10);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .scanner-row {
+    width: 100%;
+  }
+
+  .frequency-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+  }
+
+  .frequency-title {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--color-amber-700);
+  }
+
+  .frequency-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .eq-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 4px 10px;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xs);
+    transition:
+      background var(--motion-fast) var(--ease-tactile),
+      color var(--motion-fast) var(--ease-tactile),
+      border-color var(--motion-fast) var(--ease-tactile),
+      transform var(--motion-fast) var(--ease-tactile);
+  }
+
+  .eq-pip {
+    width: 5px;
+    height: 5px;
+    border-radius: 1px;
+    background: var(--color-border);
+    transition: background var(--motion-fast) var(--ease-tactile);
+  }
+
+  .eq-toggle:hover {
+    color: var(--color-blue-900);
+    border-color: var(--color-aqua-500);
+    background: var(--color-aqua-100);
+    transform: translateY(-1px);
+  }
+
+  .eq-toggle--active {
+    color: var(--color-blue-900);
+    background:
+      linear-gradient(135deg, rgb(255 255 255 / 95%), rgb(184 240 244 / 85%));
+    border-color: var(--color-blue-700);
+    box-shadow: var(--shadow-foil);
+  }
+
+  .eq-toggle--active .eq-pip {
+    background: var(--color-amber-500);
+    box-shadow: 0 0 5px rgb(255 123 57 / 90%);
+  }
+
+  /* Telemetry Bar */
+  .vault-telemetry-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: var(--space-4);
+    border-top: 1px dashed rgb(56 200 217 / 35%);
+  }
+
+  .telemetry-readout {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .readout-label {
+    color: var(--color-ink-muted);
+    font-weight: 600;
+  }
+
+  .readout-num {
+    font-weight: 800;
+    color: var(--color-blue-900);
+  }
+
+  .readout-unit {
+    color: var(--color-amber-700);
+    font-weight: 700;
+  }
+
+  .reset-lever {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    color: var(--color-amber-700);
+    text-decoration: none;
+    background: rgb(255 240 230 / 80%);
+    border: 1px solid rgb(255 123 57 / 40%);
+    padding: 3px 8px;
+    border-radius: var(--radius-xs);
+    transition: all var(--motion-fast) var(--ease-tactile);
+  }
+
+  .reset-lever:hover {
+    background: var(--color-amber-500);
+    color: var(--color-sleeve);
+  }
+
+  /* Crate Rack Grid */
+  .vault-sleeve-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+    gap: var(--space-8);
+  }
+
+  @media (max-width: 640px) {
+    .vault-console {
+      padding: var(--space-5) var(--space-4);
+    }
+  }
+</style>

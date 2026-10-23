@@ -1,0 +1,99 @@
+---
+import { getLocalizedPath } from '../../i18n/utils';
+import type { SupportedLanguage } from '../../i18n/ui';
+
+interface Props {
+  currentLang: SupportedLanguage;
+  counterpartUrl?: string;
+  currentPath?: string;
+  class?: string;
+}
+
+const {
+  currentLang,
+  counterpartUrl,
+  currentPath = Astro.url.pathname,
+  class: className = '',
+} = Astro.props;
+
+const targetLang: SupportedLanguage = currentLang === 'id' ? 'en' : 'id';
+const switchHref = counterpartUrl || getLocalizedPath(currentPath, targetLang);
+---
+
+<div class:list={['lang-switcher', className]} role="navigation" aria-label="Language selection">
+  <a
+    href={currentLang === 'id' ? undefined : switchHref}
+    class:list={['lang-tab', { 'lang-tab--active': currentLang === 'id' }]}
+    aria-current={currentLang === 'id' ? 'true' : undefined}
+    aria-label="Bahasa Indonesia"
+    tabindex={currentLang === 'id' ? -1 : 0}
+  >
+    ID
+  </a>
+  <span class="lang-divider" aria-hidden="true">|</span>
+  <a
+    href={currentLang === 'en' ? undefined : switchHref}
+    class:list={['lang-tab', { 'lang-tab--active': currentLang === 'en' }]}
+    aria-current={currentLang === 'en' ? 'true' : undefined}
+    aria-label="English"
+    tabindex={currentLang === 'en' ? -1 : 0}
+  >
+    EN
+  </a>
+</div>
+
+<style>
+  .lang-switcher {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-white);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-sm);
+    padding: 2px;
+    box-shadow: var(--shadow-gloss);
+  }
+
+  .lang-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-ink-muted);
+    text-decoration: none;
+    border-radius: var(--radius-xs);
+    transition:
+      background var(--motion-fast) var(--ease-standard),
+      color var(--motion-fast) var(--ease-standard),
+      box-shadow var(--motion-fast) var(--ease-standard);
+  }
+
+  .lang-tab:not(.lang-tab--active):hover {
+    color: var(--color-blue-900);
+    background: var(--color-aqua-100);
+  }
+
+  .lang-tab--active {
+    color: var(--color-blue-900);
+    background:
+      linear-gradient(
+        180deg,
+        rgb(255 255 255 / 90%) 0%,
+        rgb(255 255 255 / 35%) 40%,
+        transparent 100%
+      ),
+      var(--color-aqua-200);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 90%), 0 1px 3px rgb(16 55 71 / 8%);
+    cursor: default;
+  }
+
+  .lang-divider {
+    font-size: 0.65rem;
+    color: var(--color-line);
+    margin: 0 1px;
+    user-select: none;
+    opacity: 0.8;
+  }
+</style>

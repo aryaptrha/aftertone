@@ -1,0 +1,146 @@
+---
+interface Props {
+  label: string;
+  href?: string;
+  active?: boolean;
+  frequency?: string;
+  class?: string;
+}
+
+const {
+  label,
+  href,
+  active = false,
+  frequency,
+  class: className = '',
+} = Astro.props;
+
+// Deterministic acoustic wavelength generator based on theme name
+function getWavelength(text: string): string {
+  if (frequency) return frequency;
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    hash = (hash << 5) - hash + text.charCodeAt(i);
+    hash |= 0;
+  }
+  const nm = 440 + (Math.abs(hash) % 240); // 440nm to 680nm visible spectrum
+  return `${nm}nm`;
+}
+
+const wave = getWavelength(label);
+const Element = href ? 'a' : 'span';
+const linkProps = href ? { href } : {};
+---
+
+<Element
+  class:list={['frequency-tuner', { 'frequency-tuner--active': active }, className]}
+  {...linkProps}
+>
+  <span class="freq-eq" aria-hidden="true">
+    <span class="eq-bar eq-bar--1"></span>
+    <span class="eq-bar eq-bar--2"></span>
+    <span class="eq-bar eq-bar--3"></span>
+  </span>
+  <span class="freq-wave">{wave}</span>
+  <span class="freq-sep" aria-hidden="true">//</span>
+  <span class="freq-label">{label}</span>
+</Element>
+
+<style>
+  .frequency-tuner {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 3px 8px;
+    font-family: var(--font-mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    background: var(--color-sleeve);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xs);
+    text-decoration: none;
+    box-shadow: 0 1px 3px rgb(16 59 82 / 4%);
+    transition:
+      transform var(--motion-fast) var(--ease-tactile),
+      background var(--motion-fast) var(--ease-tactile),
+      border-color var(--motion-fast) var(--ease-tactile),
+      color var(--motion-fast) var(--ease-tactile),
+      box-shadow var(--motion-fast) var(--ease-tactile);
+    white-space: nowrap;
+    user-select: none;
+  }
+
+  .freq-eq {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 1.5px;
+    height: 9px;
+    margin-right: 2px;
+  }
+
+  .eq-bar {
+    width: 2px;
+    background: var(--color-aqua-500);
+    border-radius: 0.5px;
+    transition: height 0.3s ease;
+  }
+
+  .eq-bar--1 { height: 4px; }
+  .eq-bar--2 { height: 8px; background: var(--color-amber-500); }
+  .eq-bar--3 { height: 6px; }
+
+  .freq-wave {
+    color: var(--color-amber-700);
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+
+  .freq-sep {
+    color: var(--color-border);
+    font-size: 0.6rem;
+  }
+
+  .freq-label {
+    font-family: var(--font-display);
+    font-size: var(--text-xs);
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: 0.02em;
+  }
+
+  /* Hover & Active States */
+  .frequency-tuner:hover {
+    transform: translateY(-1px);
+    background: var(--color-aqua-100);
+    border-color: var(--color-aqua-500);
+    color: var(--color-blue-900);
+    box-shadow: 0 3px 8px rgb(56 200 217 / 15%);
+  }
+
+  .frequency-tuner:hover .eq-bar--1 { height: 7px; }
+  .frequency-tuner:hover .eq-bar--2 { height: 4px; }
+  .frequency-tuner:hover .eq-bar--3 { height: 9px; }
+
+  .frequency-tuner--active {
+    background:
+      linear-gradient(135deg, rgb(255 255 255 / 95%), rgb(184 240 244 / 85%));
+    border-color: var(--color-blue-700);
+    box-shadow: var(--shadow-foil);
+  }
+
+  .frequency-tuner--active .freq-label {
+    color: var(--color-blue-900);
+    font-weight: 800;
+  }
+
+  .frequency-tuner--active .eq-bar {
+    animation: eqPulse 1.2s infinite ease-in-out alternate;
+  }
+
+  @keyframes eqPulse {
+    0% { height: 3px; }
+    50% { height: 9px; }
+    100% { height: 5px; }
+  }
+</style>
