@@ -178,6 +178,10 @@ const readTime = song.data.readTimeMinutes;
 </script>
 
 <style>
+  .gatefold-panel {
+    min-width: 0;
+  }
+
   .gatefold-feature {
     position: relative;
     perspective: 1400px;
@@ -186,7 +190,7 @@ const readTime = song.data.readTimeMinutes;
 
   .gatefold-chassis {
     display: grid;
-    grid-template-columns: 1fr 1.35fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
     background: var(--color-sleeve);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
@@ -325,6 +329,8 @@ const readTime = song.data.readTimeMinutes;
   }
 
   .notes-frequencies {
+    min-width: 0;
+    max-width: 100%;
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
@@ -433,7 +439,13 @@ const readTime = song.data.readTimeMinutes;
 
   @media (max-width: 860px) {
     .gatefold-chassis {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .visual-header,
+    .visual-telemetry {
+      flex-wrap: wrap;
+      gap: var(--space-2) var(--space-3);
     }
 
     .gatefold-panel--visual {

@@ -115,6 +115,8 @@ a:hover {
   display: flex;
   flex-direction: column;
   position: relative;
+  /* Decorative orbs bleed past the edges; clip (not hidden) keeps the sticky spine working */
+  overflow-x: clip;
   background-color: var(--color-canvas);
   background-image:
     radial-gradient(circle at 14% 6%, rgb(139 232 242 / 38%), transparent 34rem),

@@ -114,8 +114,29 @@ function getLangUrl(targetLang: SupportedLanguage) {
 </aside>
 
 <!-- Mobile Floating Tactile Sound Console -->
-<nav class="mobile-sound-console" aria-label="Mobile Navigation">
-  <div class="mobile-console__inner">
+<nav class="mobile-sound-console" id="mobile-console" aria-label="Mobile Navigation" data-mobile-console>
+  <button
+    type="button"
+    class="mobile-console__toggle"
+    data-console-toggle
+    aria-controls="mobile-console-body"
+    aria-expanded="true"
+    aria-label={lang === 'id' ? 'Sembunyikan menu' : 'Hide menu'}
+    data-label-hide={lang === 'id' ? 'Sembunyikan menu' : 'Hide menu'}
+    data-label-show={lang === 'id' ? 'Tampilkan menu' : 'Show menu'}
+  >
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path
+        d="M3.5 6l4.5 4.5L12.5 6"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      />
+    </svg>
+  </button>
+
+  <div class="mobile-console__inner" id="mobile-console-body" data-console-body>
     <a href={`/${lang}/`} class="mobile-brand" aria-label="aftertone Home">
       <Image src={logoImg} alt="" width={24} height={24} loading="eager" />
       <span class="mobile-brand-title">aftertone</span>
@@ -150,6 +171,53 @@ function getLangUrl(targetLang: SupportedLanguage) {
     </a>
   </div>
 </nav>
+
+<script>
+  const STORAGE_KEY = 'aftertone:mobile-console-collapsed';
+
+  function initMobileConsole() {
+    const consoleEl = document.querySelector<HTMLElement>('[data-mobile-console]');
+    const toggle = consoleEl?.querySelector<HTMLButtonElement>('[data-console-toggle]');
+    const body = consoleEl?.querySelector<HTMLElement>('[data-console-body]');
+    if (!consoleEl || !toggle || !body || toggle.dataset.bound) return;
+    toggle.dataset.bound = 'true';
+
+    function apply(collapsed: boolean) {
+      consoleEl!.dataset.collapsed = String(collapsed);
+      body!.inert = collapsed;
+      toggle!.setAttribute('aria-expanded', String(!collapsed));
+      toggle!.setAttribute(
+        'aria-label',
+        (collapsed ? toggle!.dataset.labelShow : toggle!.dataset.labelHide) ?? '',
+      );
+    }
+
+    let collapsed = false;
+    try {
+      collapsed = localStorage.getItem(STORAGE_KEY) === 'true';
+    } catch {
+      /* storage unavailable: start expanded */
+    }
+    apply(collapsed);
+
+    toggle.addEventListener('click', () => {
+      collapsed = !collapsed;
+      apply(collapsed);
+      try {
+        localStorage.setItem(STORAGE_KEY, String(collapsed));
+      } catch {
+        /* ignore */
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initMobileConsole);
+  } else {
+    initMobileConsole();
+  }
+  document.addEventListener('astro:page-load', initMobileConsole);
+</script>
 
 <style>
   /* Desktop Vertical Obi-Spine */
@@ -411,6 +479,39 @@ function getLangUrl(targetLang: SupportedLanguage) {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     padding: var(--space-2) var(--space-3);
+    transition: transform var(--motion-normal) var(--ease-tactile);
+  }
+
+  /* Collapsed: slide the bar off-screen, leaving only the handle tab visible */
+  .mobile-sound-console[data-collapsed='true'] {
+    transform: translateY(calc(100% + var(--space-3)));
+  }
+
+  .mobile-sound-console[data-collapsed='true'] .mobile-console__toggle svg {
+    transform: rotate(180deg);
+  }
+
+  .mobile-console__toggle {
+    position: absolute;
+    right: var(--space-4);
+    bottom: 100%;
+    width: 3rem;
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-blue-900);
+    background: rgb(238 252 253 / 95%);
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    box-shadow: 0 -2px 8px rgb(16 59 82 / 8%);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .mobile-console__toggle svg {
+    transition: transform var(--motion-normal) var(--ease-tactile);
   }
 
   @media (min-width: 860px) {
