@@ -4,8 +4,8 @@ themes:
   - first-love
   - emotional-awakening
   - memory
-# Set to "published" and add publishedAt (YYYY-MM-DD) when both articles are written.
-status: draft
+status: published
+publishedAt: 2026-10-27
 featured: false
 relatedSongs: []
 # listenLinks:
