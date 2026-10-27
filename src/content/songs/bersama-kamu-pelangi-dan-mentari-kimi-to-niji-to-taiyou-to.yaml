@@ -1,0 +1,13 @@
+artist: "JKT48"
+genre: idol-pop
+themes:
+  - hope
+  - resilience
+  - togetherness
+# Set to "published" and add publishedAt (YYYY-MM-DD) when both articles are written.
+status: draft
+featured: false
+relatedSongs: []
+# listenLinks:
+#   spotify: "https://open.spotify.com/track/..."
+#   youtube: "https://www.youtube.com/watch?v=..."

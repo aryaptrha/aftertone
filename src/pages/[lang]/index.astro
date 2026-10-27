@@ -6,6 +6,7 @@ import FrequencyTuner from '../../components/ui/FrequencyTuner.astro';
 import Soundplate from '../../components/song/Soundplate.astro';
 import GatefoldFeature from '../../components/song/GatefoldFeature.astro';
 import SleeveCard from '../../components/song/SleeveCard.astro';
+import Pagination from '../../components/ui/Pagination.astro';
 import { useTranslations } from '../../i18n/utils';
 import { languages, type SupportedLanguage } from '../../i18n/ui';
 import {
@@ -26,6 +27,9 @@ const t = useTranslations(lang);
 const featuredSong = await getFeaturedArticle(lang);
 const recentSongs = await getRecentArticles(lang, featuredSong?.id);
 const availableThemes = await getAvailableThemes(lang);
+
+const PAGE_SIZE = 6;
+const totalPages = Math.ceil(recentSongs.length / PAGE_SIZE);
 ---
 
 <BaseLayout
@@ -109,7 +113,7 @@ const availableThemes = await getAvailableThemes(lang);
 
     <!-- Crate-Digging Sleeve Rack (Recent Interpretations) -->
     {recentSongs.length > 0 && (
-      <section class="section-stage crate-stage" aria-label="Recent Interpretations in the Archive">
+      <section id="archive-crate" class="section-stage crate-stage" aria-label="Recent Interpretations in the Archive">
         <div class="container">
           <div class="stage-row">
             <div class="stage-titles">
@@ -136,11 +140,25 @@ const availableThemes = await getAvailableThemes(lang);
           </div>
 
           <!-- The Crate Rack Grid -->
-          <div class="crate-rack-grid">
-            {recentSongs.map((song) => (
-              <SleeveCard song={song} lang={lang} />
+          <div class="crate-rack-grid" id="crate-grid">
+            {recentSongs.map((song, index) => (
+              <SleeveCard
+                song={song}
+                lang={lang}
+                data-page={Math.floor(index / PAGE_SIZE) + 1}
+              />
             ))}
           </div>
+
+          <!-- Archive Crate Pagination -->
+          <Pagination
+            totalPages={totalPages}
+            totalItems={recentSongs.length}
+            pageSize={PAGE_SIZE}
+            lang={lang}
+            targetGridId="crate-grid"
+            sectionId="archive-crate"
+          />
         </div>
       </section>
     )}
@@ -343,6 +361,27 @@ const availableThemes = await getAvailableThemes(lang);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
     gap: var(--space-8);
+  }
+
+  .crate-rack-grid[data-paginated="true"] > :global(.sleeve-card[data-page-active="true"]) {
+    animation: sleeveFadeIn var(--motion-fast) var(--ease-tactile);
+  }
+
+  @keyframes sleeveFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .crate-rack-grid[data-paginated="true"] > :global(.sleeve-card[data-page-active="true"]) {
+      animation: none;
+    }
   }
 
   /* Tuner Matrix Card */

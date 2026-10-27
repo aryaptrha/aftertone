@@ -33,6 +33,16 @@ export const ui = {
     'home.themes.title': 'Jelajahi Berdasarkan Tema & Suasana',
     'home.themes.subtitle': 'Temukan lagu yang saling terhubung melalui benang merah emosi dan pengalaman manusia.',
 
+    'pagination.previous': 'Sebelumnya',
+    'pagination.next': 'Selanjutnya',
+    'pagination.page': 'Halaman',
+    'pagination.of': 'dari',
+    'pagination.showing': 'Menampilkan',
+    'pagination.to': '–',
+    'pagination.records': 'rekaman',
+    'pagination.compartment': 'KOMPARTEMEN ARSIP',
+    'pagination.navLabel': 'Navigasi Halaman Arsip',
+
     'explore.title': 'Arsip Interpretasi',
     'explore.subtitle': 'Telusuri arsip interpretasi berdasarkan judul lagu, nama artis, atau tema emosional.',
     'explore.searchPlaceholder': 'Cari judul lagu atau nama artis...',
@@ -88,6 +98,16 @@ export const ui = {
     'home.viewAll': 'View Full Archive',
     'home.themes.title': 'Explore by Theme & Emotion',
     'home.themes.subtitle': 'Discover songs connected by shared emotional threads and human stories.',
+
+    'pagination.previous': 'Previous',
+    'pagination.next': 'Next',
+    'pagination.page': 'Page',
+    'pagination.of': 'of',
+    'pagination.showing': 'Showing',
+    'pagination.to': '–',
+    'pagination.records': 'records',
+    'pagination.compartment': 'ARCHIVE COMPARTMENT',
+    'pagination.navLabel': 'Archive Page Navigation',
 
     'explore.title': 'Interpretation Archive',
     'explore.subtitle': 'Browse essays across titles, artists, and emotional themes.',

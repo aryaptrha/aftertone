@@ -12,9 +12,10 @@ interface Props {
   song: Article;
   lang: SupportedLanguage;
   class?: string;
+  [key: string]: any;
 }
 
-const { song, lang, class: className = '' } = Astro.props;
+const { song, lang, class: className = '', ...rest } = Astro.props;
 const t = useTranslations(lang);
 const songHref = `/${lang}/songs/${song.data.slug}/`;
 const catCode = song.data.catalogCode;
@@ -30,6 +31,7 @@ const readTime = song.data.readTimeMinutes;
   data-song-title={displayTitle.toLowerCase()}
   data-artist={song.data.artist.toLowerCase()}
   data-themes={song.data.themes.join(',').toLowerCase()}
+  {...rest}
 >
   <div class="sleeve-card__chassis" data-sleeve-chassis>
     <!-- Specular Holographic Glare Overlay -->
