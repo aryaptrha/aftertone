@@ -19,6 +19,7 @@ const songs = defineCollection({
       status: z.enum(['draft', 'published']).default('draft'),
       publishedAt: z.coerce.date().optional(),
       featured: z.boolean().default(false),
+      acousticSpeed: z.string().optional(),
       listenLinks: z
         .object({
           spotify: z.string().url().optional(),

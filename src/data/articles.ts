@@ -2,7 +2,8 @@ import { getCollection } from 'astro:content';
 import type { SupportedLanguage } from '../i18n/ui';
 import { assertValidSongs, parseArticleId, type ArticleEntry, type SongEntry } from './validation';
 import { getThemeLabel, type ThemeId } from './themes';
-import type { GenreId } from './genres';
+import { getGenreLabel, type GenreId } from './genres';
+import { getAcousticFormat } from './formats';
 
 // One song in one language: the shared song file joined with that language's article.
 export interface Article {
@@ -25,6 +26,11 @@ export interface Article {
     featured: boolean;
     readTimeMinutes: number;
     catalogCode: string;
+    acousticSpeed: string;
+    acousticLabel: string;
+    rpm: number;
+    discType: string;
+    spineTag: string;
     sources: ArticleEntry['data']['sources'];
     relatedSongs: string[];
     listenLinks?: SongEntry['data']['listenLinks'];
@@ -67,6 +73,7 @@ export async function getAllArticles(): Promise<Article[]> {
     const { lang, slug } = parseArticleId(entry.id)!;
     const song = songsById.get(slug)!;
     const catalogIndex = catalogOrder.indexOf(slug);
+    const format = getAcousticFormat(slug, song.data.acousticSpeed);
     return {
       id: entry.id,
       entry,
@@ -78,6 +85,11 @@ export async function getAllArticles(): Promise<Article[]> {
         description: entry.data.description ?? entry.data.summary,
         readTimeMinutes: readTimeMinutes(entry.body),
         catalogCode: catalogIndex === -1 ? 'AT-DRAFT' : `AT-${String(catalogIndex + 1).padStart(3, '0')}`,
+        acousticSpeed: format.speed,
+        acousticLabel: format.label,
+        rpm: format.rpm,
+        discType: format.discType,
+        spineTag: format.spineTag,
       },
     };
   });

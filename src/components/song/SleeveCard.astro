@@ -43,6 +43,8 @@ const readTime = song.data.readTimeMinutes;
         title={displayTitle}
         artist={song.data.artist}
         catalogCode={catCode}
+        speed={song.data.acousticLabel}
+        rpm={song.data.rpm}
         size="sm"
         interactive={false}
       />
@@ -53,7 +55,7 @@ const readTime = song.data.readTimeMinutes;
       <!-- Jacket Header: Catalog Code & Language Badge -->
       <div class="jacket-header">
         <ArchivalStamp code={catCode} label={genreLabel} color="aqua" />
-        <span class="jacket-spine-tag">STEREO LP</span>
+        <span class="jacket-spine-tag">{song.data.spineTag}</span>
       </div>
 
       <!-- Artwork & Mood Chamber -->

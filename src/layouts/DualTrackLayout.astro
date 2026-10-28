@@ -64,6 +64,8 @@ const readTime = song.data.readTimeMinutes;
                 title={displaySongTitle}
                 artist={song.data.artist}
                 catalogCode={catCode}
+                speed={song.data.acousticLabel}
+                rpm={song.data.rpm}
                 size="md"
                 interactive={true}
               />
@@ -73,11 +75,11 @@ const readTime = song.data.readTimeMinutes;
             <div class="stem-telemetry">
               <div class="telemetry-row">
                 <span class="telemetry-k">CATALOG NO.</span>
-                <span class="telemetry-v">{catCode} // LP</span>
+                <span class="telemetry-v">{catCode} // {song.data.discType}</span>
               </div>
               <div class="telemetry-row">
                 <span class="telemetry-k">ACOUSTIC SPEED</span>
-                <span class="telemetry-v">33⅓ RPM STEREO</span>
+                <span class="telemetry-v">{song.data.acousticSpeed}</span>
               </div>
               {genreLabel && (
                 <div class="telemetry-row">

@@ -3,6 +3,8 @@ interface Props {
   title?: string;
   artist?: string;
   catalogCode?: string;
+  speed?: string;
+  rpm?: number;
   size?: 'sm' | 'md' | 'lg';
   interactive?: boolean;
   class?: string;
@@ -12,6 +14,8 @@ const {
   title = 'aftertone',
   artist = 'Archival Master',
   catalogCode = 'AT-001',
+  speed = '33⅓ RPM // STEREO',
+  rpm = 33,
   size = 'md',
   interactive = true,
   class: className = '',
@@ -21,6 +25,7 @@ const {
 <div
   class:list={['soundplate-rig', `soundplate-rig--${size}`, { 'is-interactive': interactive }, className]}
   data-soundplate
+  data-rpm={rpm}
   aria-hidden="true"
 >
   <!-- Turntable Platter Base -->
@@ -35,7 +40,7 @@ const {
         <div class="label-rim"></div>
         <div class="label-content">
           <span class="label-brand">aftertone</span>
-          <span class="label-speed">33⅓ RPM // STEREO</span>
+          <span class="label-speed">{speed}</span>
           <span class="label-code">{catalogCode}</span>
           <span class="label-title">{title}</span>
           <span class="label-artist">{artist}</span>
@@ -71,10 +76,13 @@ const {
       const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (prefersReduced) return;
 
-      // Ambient 33 1/3 RPM continuous revolution
+      // Ambient continuous revolution scaled to authentic RPM (33 RPM -> 36s, 45 RPM -> 26.7s)
+      const rpmAttr = Number(rig.dataset.rpm) || 33;
+      const baseDuration = (33.33 / rpmAttr) * 36;
+
       const rotationTween = gsap.to(disc, {
         rotation: 360,
-        duration: 36,
+        duration: baseDuration,
         repeat: -1,
         ease: 'none',
         paused: false,

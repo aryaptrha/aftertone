@@ -32,7 +32,7 @@ const readTime = song.data.readTimeMinutes;
       <div class="visual-inner">
         <div class="visual-header">
           <ArchivalStamp code="DELUXE EDITION" label={catCode} color="amber" />
-          <span class="visual-format">33⅓ RPM // STEREO</span>
+          <span class="visual-format">{song.data.acousticLabel}</span>
         </div>
 
         <!-- Turntable Platter Visual -->
@@ -41,6 +41,8 @@ const readTime = song.data.readTimeMinutes;
             title={displayTitle}
             artist={song.data.artist}
             catalogCode={catCode}
+            speed={song.data.acousticLabel}
+            rpm={song.data.rpm}
             size="md"
             interactive={true}
           />
@@ -54,7 +56,7 @@ const readTime = song.data.readTimeMinutes;
           </div>
           <div class="telemetry-item">
             <span class="telemetry-label">ACOUSTIC SPEED</span>
-            <span class="telemetry-val">432Hz ANALYTICAL MASTER</span>
+            <span class="telemetry-val">{song.data.acousticSpeed}</span>
           </div>
         </div>
       </div>

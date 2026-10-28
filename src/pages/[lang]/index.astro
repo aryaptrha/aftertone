@@ -86,7 +86,9 @@ const totalPages = Math.ceil(recentSongs.length / PAGE_SIZE);
           <Soundplate
             title={featuredSong?.data.songTitle || featuredSong?.data.title || 'aftertone'}
             artist={featuredSong?.data.artist || 'Master Tape'}
-            catalogCode="AT-001"
+            catalogCode={featuredSong?.data.catalogCode || 'AT-001'}
+            speed={featuredSong?.data.acousticLabel}
+            rpm={featuredSong?.data.rpm}
             size="lg"
             interactive={true}
           />
